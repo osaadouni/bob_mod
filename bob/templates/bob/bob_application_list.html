@@ -1,0 +1,64 @@
+{% extends "home.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block dashboard_content %}
+    <div class="container-fluid mt-3">
+    <div class="card mb-3">
+
+        <div class="card-header">
+            BOB werkvoorraad
+            <a href="{% url 'bob:bob-create' %}" class="btn btn-primary btn-sm float-right" role="button">
+                <i class="fa fa-list" aria-hidden="true"></i>
+                Nieuwe BOB aanvraag
+            </a>
+        </div>
+        <div class="card-body">
+        {% if object_list %}
+            <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <th>ID</th>
+                    <th>BOB handeling</th>
+                    <th>Aanvraag PV</th>
+                    <th>Datum PV</th>
+                    <th>Naam verbalisant</th>
+                    <th>Contactgegevens verbalisant</th>
+                    <th>Bevoegdheid</th>
+                    <th>VTMStartdatum / op</th>
+                    <th>VTMEinddatum </th>
+                    <th>Actions </th>
+                </theaD>
+                <tbody>
+                {% for obj in object_list %}
+                    <tr>
+                       <td>{{ obj.pk }}</td>
+                       <td>{{ obj.dvom_bobhandeling }}</td>
+                       <td>{{ obj.dvom_aanvraagpv }}</td>
+                       <td>{{ obj.dvom_datumpv }}</td>
+                       <td>{{ obj.dvom_verbalisant }}</td>
+                       <td>{{ obj.dvom_verbalisantcontactgegevens }}</td>
+                       <td>{{ obj.dvom_strafvorderlijkebevoegdheidid }}</td>
+                       <td>{{ obj.dvom_vtmstartdatum }}</td>
+                       <td>{{ obj.dvom_vtmeinddatum }}</td>
+                        <td>
+                            <a href="{% url 'bob:bob-edit' obj.pk %}" class="btn btn-secondary btn-sm">Edit <i class="fa fa-pencil" aria-hidden="true"></i> </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <p>Geen PV aanvragen gevonden.</p>
+        {% endif %}
+
+        </div>
+    </div>
+
+    </div>
+
+    {{ form.media }}            {# Adds date-picker required JS and CSS #}
+
+{% endblock %}

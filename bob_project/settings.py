@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'accounts',
     'bob',
     'crispy_forms',
     'bootstrap_datepicker_plus',
@@ -119,16 +120,46 @@ USE_L10N = True
 USE_TZ = True
 
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
-# Enable Bootstrap 4
+# CRISPY TEMPLATE BOOTSTRAP Version
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Use BOOTSTRAP3 if you are using Bootstrap 3
 BOOTSTRAP4 = {
     'include_jquery': True,
 }
+
+# Redirect to home URL after login (Default redirects to /accounts/profile/)
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Login url
+# default: LOGIN_URL = '/accounts/login/'
+LOGIN_URL = 'accounts:account_login' # defined by named URL pattern
+
+
+# For testing. Log any emails sent to the console
+# (in case of password reset, you can copy the password reset link from the website )
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+DATE_INPUT_FORMATS = [
+    '%Y-%m-%d',
+    '%m/%d/%Y',
+    '%m/%d/%y',
+    '%d/%m/%Y',
+]

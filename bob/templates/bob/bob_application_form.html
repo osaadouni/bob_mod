@@ -7,14 +7,14 @@
     <div class="card" style="width:38rem;">
         <div class="card-header">
             BOB aanvraag formulier
-            <a href="#" class="btn btn-primary btn-sm float-right" role="button">
+            <a href="{% url 'bob:bob-index' %}" class="btn btn-primary btn-sm float-right" role="button">
                 <i class="fa fa-list" aria-hidden="true"></i>
                 Werkvoorraad
             </a>
         </div>
         <div class="card-body">
 
-        <form method="post" action="." novalidate>
+        <form method="post" action="" enctype="multipart/form-data" novalidate>
 
             {% csrf_token %}
             {{ form|crispy }}
