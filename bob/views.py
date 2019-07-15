@@ -9,7 +9,7 @@ from django.core import paginator
 from django.core.paginator import Paginator, PageNotAnInteger
 
 from .models import Onderzoek, BobHandeling
-from .forms import BOBApplicationForm
+from .forms import BOBApplicationForm, OnderzoekForm
 
 # Create your views here.
 def index_page(request):
@@ -23,6 +23,7 @@ class HomePage(LoginRequiredMixin, TemplateView):
     template_name = 'bob/home.html'
 
 
+# BOBHandeling
 class BOBApplicationListView(LoginRequiredMixin,ListView):
     model = BobHandeling
     form_class = BOBApplicationForm
@@ -40,16 +41,17 @@ class BOBApplicationListView(LoginRequiredMixin,ListView):
         return context
 
 
-
 class BOBApplicationCreateView(LoginRequiredMixin,CreateView):
     model = BobHandeling
     template_name = 'bob/bob_application_form.html'
     form_class = BOBApplicationForm
     success_url = reverse_lazy('bob:bob-index')
 
+
 class BOBApplicationDetailView(DetailView):
     model = BobHandeling
     template_name = 'bob/bob_application_detail.html'
+
 
 class BOBApplicationUpdateView(UpdateView):
     model = BobHandeling
@@ -62,3 +64,30 @@ class BOBApplicationDeleteView(DeleteView):
     model = BobHandeling
     template_name = 'bob/bob_application_confirm_delete.html'
     success_url = reverse_lazy('bob:bob-index')
+
+
+# Onderzoek
+class OnderzoekListView(LoginRequiredMixin, ListView):
+    model = Onderzoek
+    form_class = OnderzoekForm
+    template_name = 'bob/bob_onderzoek_list.html'
+    ordering = ['-pk']
+    paginate_by = 5
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        onderzoek_list = Onderzoek.objects.order_by('-pk')
+        print(onderzoek_list)
+        paginator = Paginator(onderzoek_list, self.paginate_by)
+        page = self.request.GET.get('page')
+        onderzoeken = paginator.get_page(page)
+        print(onderzoeken)
+        context['object_list'] = onderzoeken
+        return context
+
+
+class OnderzoekCreateView(LoginRequiredMixin,CreateView):
+    model = Onderzoek
+    template_name = 'bob/bob_onderzoek_form.html'
+    form_class = OnderzoekForm
+    success_url = reverse_lazy('bob:onderzoek-index')

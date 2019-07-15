@@ -1,12 +1,12 @@
-{% extends "home.html" %}
+{% extends "base.html" %}
 
 {% load crispy_forms_tags %}
 
-{% block dashboard_content %}
+{% block content %}
     <div class="container-fluid mt-3">
-    <div class="card" style="width:38rem;">
+    <div class="card">
         <div class="card-header">
-            BOB handeling detail
+            BOB handeling detail (ID: #{{ object.pk }})
             <a href="{% url 'bob:bob-index' %}" class="btn btn-primary btn-sm float-right" role="button">
                 <i class="fa fa-list" aria-hidden="true"></i>
                 Werkvoorraad

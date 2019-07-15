@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% load crispy_forms_tags %}
@@ -7,10 +8,10 @@
     <div class="card mb-3">
 
         <div class="card-header">
-            BOB werkvoorraad
-            <a href="{% url 'bob:bob-create' %}" class="btn btn-primary btn-sm float-right" role="button">
+            Onderzoek werkvoorraad
+            <a href="{% url 'bob:onderzoek-create' %}" class="btn btn-primary btn-sm float-right" role="button">
                 <i class="fa fa-list" aria-hidden="true"></i>
-                Nieuwe BOB aanvraag
+                Nieuwe Onderzoek
             </a>
         </div>
         <div class="card-body">
@@ -19,28 +20,12 @@
             <table class="table table-bordered" width="100%" cellspacing="0">
                 <thead>
                     <th>ID</th>
-                    <th>BOB handeling</th>
-                    <th>Aanvraag PV</th>
-                    <th>Datum PV</th>
-                    <th>Naam verbalisant</th>
-                    <th>Contactgegevens verbalisant</th>
-                    <th>Bevoegdheid</th>
-                    <th>VTMStartdatum / op</th>
-                    <th>VTMEinddatum </th>
                     <th>Actions </th>
                 </theaD>
                 <tbody>
                 {% for obj in object_list %}
                     <tr>
                        <td>{{ obj.pk }}</td>
-                       <td>{{ obj.dvom_bobhandeling }}</td>
-                       <td>{{ obj.dvom_aanvraagpv }}</td>
-                       <td>{{ obj.dvom_datumpv }}</td>
-                       <td>{{ obj.dvom_verbalisant }}</td>
-                       <td>{{ obj.dvom_verbalisantcontactgegevens }}</td>
-                       <td>{{ obj.dvom_strafvorderlijkebevoegdheidid }}</td>
-                       <td>{{ obj.dvom_vtmstartdatum }}</td>
-                       <td>{{ obj.dvom_vtmeinddatum }}</td>
                         <td>
                             <div class="btn-group btn-group-sm" role="group" aria-label="">
                                 <a href="{% url 'bob:bob-detail' obj.pk %}" class="btn btn-info btn-sm"><i class="fa fa-eye" aria-hidden="true"></i> </a>

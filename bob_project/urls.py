@@ -16,17 +16,22 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.views import LoginView
+from django.views.generic import RedirectView
 
 from .views import HomePage
 
+
 urlpatterns = [
-    path('', HomePage.as_view(), name='home'),
     path('admin/', admin.site.urls),
-    path('bob/', include('bob.urls')),
-    #path('login/', LoginView.as_view(), name='bob-login'),
 ]
 
 urlpatterns += [
-    #path('accounts/',  include('django.contrib.auth.urls')),
+    path('bob/', include('bob.urls')),
+    path('', RedirectView.as_view(url='/bob/', permanent=True)),
+    # HomePage.as_view(), name='home'),
+]
+
+urlpatterns += [
     path('accounts/',  include('accounts.urls')),
+    #path('accounts/',  include('django.contrib.auth.urls')),
 ]

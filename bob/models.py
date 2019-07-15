@@ -6,7 +6,10 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 # Create your models here.
-DVOM_LOCATIES = ()
+DVOM_LOCATIES = (
+    ('NL', 'Nederland'),
+    ('BE', 'Belgie'),
+)
 
 DVOM_CLASSIFICATIE_OPTIES = (
     ('FR', 'Fraude'),
@@ -21,24 +24,27 @@ DVOM_AFSLUITENONDERZOEK_OPTIES = (
     ('3', 'Sepot'),
 )
 
-class Onderzoek:
-    dvom_onderzoekid = models.AutoField('Onderzoek', primary_key=True)
+class Onderzoek(models.Model):
+    dvom_onderzoekid = models.AutoField(primary_key=True)
     dvom_locatieid = models.CharField('Parket', max_length=10, choices=DVOM_LOCATIES, default='')
     dvom_naam = models.CharField('Onderzoeksnaam', max_length=100, blank=True, null=True)
     dvom_codenaam = models.CharField('Codenaam', max_length=100, blank=True, null=True)
     dvom_onderzoeksinstantieid = models.CharField('Onderzozeksinstantie', max_length=10,  choices=())
     dvom_procesverbaalnummer = models.CharField('Process verbaal nummer',max_length=100, )
-    dvom_classificatie = models.CharField('Classificatie', max_length=2, choices=DVOM_CLASSIFICATIE_OPTIES)
-    dvom_naamcsv = models.CharField('Naam CSV', max_length=100)
-    dvom_omschrijvingcsv = models.CharField('Omschrijving CSV', max_length=2000)
-    dvom_zaakgriffierid = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Zaaksgriffier')
-    dvom_zaakovjid = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='ZaaksOvJ')
-    dvom_zaakparketsecrid = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Zaakssecretaris')
-    dvom_zaakrcid = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='ZaaksRC')
+    dvom_classificatie = models.CharField('Classificatie', max_length=2, choices=DVOM_CLASSIFICATIE_OPTIES, blank=True, null=True)
+    dvom_naamcsv = models.CharField('Naam CSV', max_length=100, blank=True, null=True)
+    dvom_omschrijvingcsv = models.CharField('Omschrijving CSV', max_length=2000, blank=True, null=True)
+    dvom_zaakgriffierid = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Zaaksgriffier',
+                                            related_name='zaakgriffier_onderzoeken', null=True)
+    dvom_zaakovjid = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='ZaaksOvJ',
+                                       related_name='zaakovj_onderzoeken', null=True)
+    dvom_zaakparketsecrid = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Zaakssecretaris',
+                                              related_name='zaakparketsecr_onderzoeken', null=True)
+    dvom_zaakrcid = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='ZaaksRC',
+                                      related_name='zaakrc_onderzoeken', null=True)
     dvom_afsluitenonderzoek = models.CharField('Afsluiten onderzoek',
                                                max_length=1,
-                                               choices=DVOM_AFSLUITENONDERZOEK_OPTIES)
-
+                                               choices=DVOM_AFSLUITENONDERZOEK_OPTIES, blank=True, null=True)
     np_bobaanvraagid = models.IntegerField()
 
     class Meta:

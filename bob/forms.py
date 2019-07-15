@@ -2,8 +2,9 @@ import datetime
 from bootstrap_datepicker_plus import DatePickerInput
 from django import forms
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
-from .models import BobHandeling
+from .models import BobHandeling, Onderzoek
 
 
 
@@ -83,6 +84,22 @@ class BOBApplicationForm(forms.ModelForm):
             'dvom_verlenging': forms.RadioSelect,
         }
 
+        error_messages = {
+            "dvom_aanvraagpv": {
+                "required": _("Dit veld is verplicht.")
+            },
+            "dvom_verbalisant": {
+                "required": _("Dit veld is verplicht.")
+            },
+            "dvom_verbalisantcontactgegevens": {
+                "required": _("Dit veld is verplicht.")
+            },
+            "dvom_strafvorderlijkebevoegdheidid": {
+                "required": _("Dit veld is verplicht.")
+            },
+
+        }
+
     def clean(self):
 
         print('BOBApplicationForm::clean()')
@@ -95,3 +112,10 @@ class BOBApplicationForm(forms.ModelForm):
         print(f"dvom_bobhandeling: {dvom_bobhandeling}")
 
         return cleaned_data
+
+
+class OnderzoekForm(forms.ModelForm):
+
+    class Meta:
+        model = Onderzoek
+        exclude = ('onderzoekid',)
