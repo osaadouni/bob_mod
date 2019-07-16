@@ -76,6 +76,11 @@ VERLENING_PERIODES = (
 
 
 
+def user_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    #return 'user_{0}/{1}'.format(instance.user.id, filename)
+    return 'user_{0}/{1}'.format(instance.user.username, filename)
+
 
 class BobHandeling(models.Model):
     dvom_bobhandelingid = models.AutoField(primary_key=True)
@@ -163,6 +168,8 @@ class BobHandeling(models.Model):
     dvom_machtiging_periode = models.CharField('Machtiging periode (eenheid)', max_length=2, choices=VERLENING_PERIODES,
                                                blank=True, null=True,
                                                help_text="""Eenheid van de periode van de machtiging """)
+
+    pdf_document = models.FileField('PDF Document', upload_to='documents/%Y/%m/%d', blank=True, null=True)
 
     def __str__(self):
         return f"{self.dvom_bobhandeling} (#{self.dvom_bobhandelingid}) - PV: {self.dvom_aanvraagpv} "
