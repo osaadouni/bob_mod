@@ -21,12 +21,26 @@
 
   <!-- Custom styles for this template -->
   {% block stylesheet %}
+  <!-- MDB CSS -->
+  <link href="{% static  "css/mdb/mdb.min.css" %}" rel="stylesheet">
+
   <link href="{% static  "css/sidebar.css" %}" rel="stylesheet">
   {% endblock %}
 
   <!-- jQuery & Bootstrap JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  {% block javascript %}
+
+    {%  comment %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    {% endcomment %}
+
+    <script src="{% static "js/jquery-3.4.1.min.js" %}"></script>
+    <script src="{% static "js/popper.min.js" %}"></script>
+    <script src="{% static "js/bootstrap.min.js" %}"></script>
+    <script src="{% static "js/mdb.min.js" %}"></script>
+
+   {% endblock %}
 
 </head>
 

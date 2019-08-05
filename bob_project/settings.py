@@ -38,10 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'accounts',
-    'bob',
+
+    # third party
     'crispy_forms',
     'bootstrap_datepicker_plus',
+
+    # local
+    'accounts',
+    'bob',
+    'my_app',
 ]
 
 MIDDLEWARE = [
@@ -137,6 +142,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CRISPY TEMPLATE BOOTSTRAP Version
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_CLASS_CONVERTERS = {'form-group': 'md-form'}
 
 # Use BOOTSTRAP3 if you are using Bootstrap 3
 BOOTSTRAP4 = {

@@ -1,31 +1,48 @@
-{% extends "base.html" %}
+            {% extends "base.html" %}
 
 {% load crispy_forms_tags %}
 
 {% block content %}
+
     <div class="container-fluid mt-3">
-    <div class="card" >
-        <div class="card-header">
-            BOB aanvraag formulier
-            <a href="{% url 'bob:bob-index' %}" class="btn btn-primary btn-sm float-right" role="button">
-                <i class="fa fa-list" aria-hidden="true"></i>
-                Werkvoorraad
-            </a>
-        </div>
-        <div class="card-body">
 
-        <form method="post" action="" enctype="multipart/form-data" novalidate>
+        {% comment %}{% include 'bob/mdb_form.html' %} {% endcomment %}
 
-            {% csrf_token %}
-            {{ form|crispy }}
+        <div class="card mb-3" >
+            <div class="card-header">
+                BOB aanvraag formulier
+                <a href="{% url 'bob:bob-index' %}" class="btn btn-primary btn-sm float-right" role="button">
+                    <i class="fa fa-list" aria-hidden="true"></i>
+                    Werkvoorraad
+                </a>
+            </div>
+            <div class="card-body" >
 
-            <button type="submit" class="btn btn-primary">Opslaan</button>
-        </form>
+                <form method="post" action="" enctype="multipart/form-data" novalidate>
 
-      </div>
-    </div>
+                    {% csrf_token %}
 
-    </div>
+                    {% for field in form  %}
+                        {% if not forloop.counter|divisibleby:2 %}
+                            <div class="form-row">
+                        {% endif %}
+                        <div class="form-group col-sm-6 mb-0">
+                           {{ field|as_crispy_field }}
+                        </div>
+                        {% if forloop.counter|divisibleby:2 %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% comment %}   {{ form|crispy }} {% endcomment %}
+
+                    <button type="submit" class="btn btn-primary">Opslaan</button>
+                </form>
+
+            </div> <!-- /.card-body -->
+        </div> <!-- /.card -->
+
+    </div> <!-- /.container-fluid -->
 
 {{ form.media }}            {# Adds date-picker required JS and CSS #}
 

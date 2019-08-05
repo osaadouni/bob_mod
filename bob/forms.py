@@ -1,11 +1,12 @@
 import datetime
-from bootstrap_datepicker_plus import DatePickerInput
 from django import forms
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from .models import BobHandeling, Onderzoek
+from bootstrap_datepicker_plus import DatePickerInput
 
+
+from .models import BobHandeling, Onderzoek
 
 
 
@@ -119,3 +120,7 @@ class OnderzoekForm(forms.ModelForm):
     class Meta:
         model = Onderzoek
         exclude = ('onderzoekid',)
+
+
+
+

@@ -38,5 +38,9 @@ urlpatterns += [
     #path('accounts/',  include('django.contrib.auth.urls')),
 ]
 
+urlpatterns += [
+    path('my_form/',  include('my_app.urls')),
+]
+
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
