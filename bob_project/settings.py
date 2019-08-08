@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     # third party
     'crispy_forms',
     'bootstrap_datepicker_plus',
+    'django_tables2',
+
 
     # local
     'accounts',

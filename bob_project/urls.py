@@ -29,7 +29,7 @@ urlpatterns = [
 
 urlpatterns += [
     path('bob/', include('bob.urls')),
-    path('', RedirectView.as_view(url='/bob/', permanent=True)),
+    path('', RedirectView.as_view(url='/bob/', permanent=True), name='index'),
     # HomePage.as_view(), name='home'),
 ]
 
