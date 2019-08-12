@@ -1,0 +1,55 @@
+            {% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <div class="container-fluid mt-3">
+
+        {% comment %}{% include 'portal/mdb_form.html' %} {% endcomment %}
+
+        <div class="card mb-3" >
+            <div class="card-header">
+                BOB aanvraag formulier
+                <a href="{% url 'portal:index' %}" class="btn btn-primary btn-sm float-right btn-politie" role="button">
+                    <i class="fa fa-list" aria-hidden="true"></i>
+                    Werkvoorraad
+                </a>
+            </div>
+            <div class="card-body" >
+
+                {% crispy form %}
+
+                {%  comment %}
+                <form method="post" action="" enctype="multipart/form-data" novalidate>
+
+                    {% csrf_token %}
+
+                    {% for field in form  %}
+                        {% if not forloop.counter|divisibleby:2 %}
+                            <div class="form-row">
+                        {% endif %}
+                        <div class="form-group col-sm-6 mb-0 ">
+                           {{ field|as_crispy_field }}
+                        </div>
+                        {% if forloop.counter|divisibleby:2 %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {{ form|crispy }}
+
+                    <button type="submit" class="btn btn-primary">Opslaan</button>
+                </form>
+
+                {% endcomment %}
+
+            </div> <!-- /.card-body -->
+        </div> <!-- /.card -->
+
+    </div> <!-- /.container-fluid -->
+
+{{ form.media }}            {# Adds date-picker required JS and CSS #}
+
+{% endblock %}
+

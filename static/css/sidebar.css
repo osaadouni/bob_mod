@@ -62,6 +62,20 @@ body {
 
 }
 
+.btn-politie {
+    color: #fff;
+    background-color: #0b2429;
+    border-color: #17a2b8;
+    background-color: rgb(0, 70, 130) !important;
+    border-color: rgb(0, 70, 130);
+}
+.btn-politie:hover {
+    color: #fff;
+    background-color: #0b2429;
+    border-color: rgb(0, 70, 130);
+    background-color: rgb(0, 70, 130);
+}
+
 
 /*
  *  Custom navbar

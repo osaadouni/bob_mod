@@ -43,12 +43,15 @@ INSTALLED_APPS = [
     'crispy_forms',
     'bootstrap_datepicker_plus',
     'django_tables2',
+    'django_filters',
 
 
     # local
     'accounts',
-    'bob',
-    'my_app',
+    'home',
+    'portal',
+    'interception',
+    'resources',
 ]
 
 MIDDLEWARE = [
@@ -157,7 +160,7 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Login url
 # default: LOGIN_URL = '/accounts/login/'
-LOGIN_URL = 'accounts:account_login' # defined by named URL pattern
+LOGIN_URL = 'accounts:login' # defined by named URL pattern
 
 
 # For testing. Log any emails sent to the console

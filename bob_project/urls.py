@@ -20,26 +20,15 @@ from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import HomePage
+from home.views import HomeIndex
 
 
 urlpatterns = [
+    path('', HomeIndex.as_view(),  name='home-index'),
+    path('portal/', include('portal.urls')),
+
+    path('accounts/', include('accounts.urls')),
     path('admin/', admin.site.urls),
-]
-
-urlpatterns += [
-    path('bob/', include('bob.urls')),
-    path('', RedirectView.as_view(url='/bob/', permanent=True), name='index'),
-    # HomePage.as_view(), name='home'),
-]
-
-urlpatterns += [
-    path('accounts/',  include('accounts.urls')),
-    #path('accounts/',  include('django.contrib.auth.urls')),
-]
-
-urlpatterns += [
-    path('my_form/',  include('my_app.urls')),
 ]
 
 

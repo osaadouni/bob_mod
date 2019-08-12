@@ -48,16 +48,24 @@
 
   <div class="d-flex" id="wrapper">
 
+  {%  if user.is_authenticated  %}
     <!-- Sidebar -->
     <div class="bg-light border-right" id="sidebar-wrapper">
       <div class="sidebar-heading">BOB Module </div>
       <div class="list-group list-group-flush">
-        <a href="{% url 'index' %}" class="list-group-item list-group-item-action bg-light">Dashboard</a>
-        <a href="{% url 'bob:bob-index' %}" class="list-group-item list-group-item-action bg-light">BOB aanvragen</a>
+        <a href="{% url 'portal:index' %}" class="list-group-item list-group-item-action bg-light">Home</a>
+
+        {% if perms.resources.can_add_bobaanvraag %}
+            <a href="{% url 'portal:portal-create' %}" class="list-group-item list-group-item-action bg-light">Nieuwe Aanvraag</a>
+        {% endif %}
+        <a href="{% url 'portal:portal-list' %}" class="list-group-item list-group-item-action bg-light">Overzicht aanvragen</a>
+          {% comment %}
         <a href="{% url 'bob:onderzoek-index' %}" class="list-group-item list-group-item-action bg-light">Onderzoeken</a>
+        {% endcomment %}
       </div>
     </div>
     <!-- /#sidebar-wrapper -->
+  {% endif %}
 
     <!-- Page Content -->
     <div id="page-content-wrapper">
@@ -79,14 +87,14 @@
                 {{ user.username }}
               </a>
               <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="{% url 'accounts:account_detail' %}">Mijn account</a>
+                <a class="dropdown-item" href="{% url 'accounts:detail' %}">Mijn account</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{% url 'accounts:account_logout' %}">Uitloggen</a>
+                <a class="dropdown-item" href="{% url 'accounts:logout' %}">Uitloggen</a>
               </div>
             </li>
             {% else %}
                 <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'accounts:account_login' %}">Inloggen</a>
+                    <a class="nav-link" href="{% url 'accounts:login' %}">Inloggen</a>
                 </li>
             {% endif %}
           </ul>
