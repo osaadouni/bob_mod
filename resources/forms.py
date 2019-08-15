@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from bootstrap_datepicker_plus import DatePickerInput
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset
+from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div
 from crispy_forms.bootstrap import FieldWithButtons,StrictButton
 
 
@@ -118,8 +118,8 @@ class BOBAanvraagForm(forms.ModelForm):
             Fieldset(
                 'Algemeen',
                 Row(
-                    Column('dvom_aanvraagpv', css_class='form-group col-md-6 mb-0'),
-                    Column('dvom_datumpv', css_class='form-group col-md-6 mb-0'),
+                    Div('dvom_aanvraagpv', css_class='col-md-6 mb-0 bob-data-required'),
+                    Div('dvom_datumpv', css_class='col-md-6 mb-0 bob-data-required'),
                     css_class='form-row'
                 ),
                 Row(
@@ -168,7 +168,7 @@ class BOBAanvraagForm(forms.ModelForm):
                 ),
             ),
 
-            Submit('submit', 'Opslaan &raquo;', css_class='btn-politie float-right')
+            Submit('submit', 'Opslaan &raquo;', id="id_btn_submit", css_class='btn-politie float-right btn-submit')
         )
 
     def clean(self):
