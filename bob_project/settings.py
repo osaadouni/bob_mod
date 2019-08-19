@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'django_tables2',
     'django_filters',
+    'django_fsm',
+    'django_fsm_log',
 
 
     # local

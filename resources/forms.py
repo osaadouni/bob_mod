@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from bootstrap_datepicker_plus import DatePickerInput
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div
+from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div, Field
 from crispy_forms.bootstrap import FieldWithButtons,StrictButton
 
 
@@ -29,12 +29,14 @@ class BOBAanvraagForm(forms.ModelForm):
     dvom_verlengingingaandop = forms.DateField(
         label='Verlenging ingaand op',
         widget=DatePickerInput(format='%d/%m/%Y'),
-        input_formats=settings.DATE_INPUT_FORMATS
+        input_formats=settings.DATE_INPUT_FORMATS,
+        required=False,
     )
     dvom_verlengingeinddatum = forms.DateField(
         label='Verlenging einddatum',
         widget=DatePickerInput(format='%d/%m/%Y'),
-        input_formats=settings.DATE_INPUT_FORMATS
+        input_formats=settings.DATE_INPUT_FORMATS,
+        required=False,
     )
     dvom_vtmstartdatum = forms.DateField(
         label='VTMStartdatum / op',
@@ -49,28 +51,6 @@ class BOBAanvraagForm(forms.ModelForm):
         input_formats=settings.DATE_INPUT_FORMATS
     )
 
-    dvom_machtigingop = forms.DateField(
-        label='Machtiging op',
-        widget=DatePickerInput(format='%d/%m/%Y'),
-        help_text='Datum waarop de machtiging is afgegeven',
-        input_formats=settings.DATE_INPUT_FORMATS,
-        required=False
-    )
-    dvom_machtigingstartdatum = forms.DateField(
-        label='Machtiging startdatum / op',
-        widget=DatePickerInput(format='%d/%m/%Y'),
-        help_text='Startdatum van de machtiging',
-        input_formats=settings.DATE_INPUT_FORMATS,
-        required=False
-    )
-    dvom_machtigingeinddatum = forms.DateField(
-        label='Machtiging einddatum',
-        widget=DatePickerInput(format='%d/%m/%Y'),
-        help_text='Einddatum van de machtiging',
-        input_formats=settings.DATE_INPUT_FORMATS,
-        required=False
-    )
-
 
     #dvom_heterdaad = forms.TypedChoiceField(
     #    coerce=lambda x: x == 'True',
@@ -79,16 +59,13 @@ class BOBAanvraagForm(forms.ModelForm):
     #)
     class Meta:
         model = BOBAanvraag
-        exclude = ('dvom_bobhandelingid', 'dvom_bobhandeling')
+        exclude = ('dvom_bobhandelingid', 'dvom_bobhandeling', 'owner', 'status')
         help_texts = {
             'dvom_datumpv': 'Datum van het PV',
             'dvom_aanvraagpv': 'PV nummer van het aanvraag PV',
-            'dvom_heeftverlenging': 'Is deze portal handeling verlengd',
             'dvom_verlenging': 'Betreft het een verlenging van een eerdere portal handeling',
         }
         widgets = {
-            'dvom_heterdaad': forms.RadioSelect,
-            'dvom_heeftverlenging': forms.RadioSelect,
             'dvom_verlenging': forms.RadioSelect,
         }
 
@@ -112,6 +89,7 @@ class BOBAanvraagForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_action = "."
+        self.helper.form_id = 'aanvraagFormId'
         self.helper.attrs = {'novalidate': 'true'}
 
         self.helper.layout = Layout(
@@ -168,7 +146,7 @@ class BOBAanvraagForm(forms.ModelForm):
                 ),
             ),
 
-            Submit('submit', 'Opslaan &raquo;', id="id_btn_submit", css_class='btn-politie float-right btn-submit')
+            Submit('btn_submit_id', 'Opslaan &raquo;', id="id_btn_submit", css_class='btn-politie float-right btn-submit')
         )
 
     def clean(self):
@@ -202,4 +180,26 @@ class BOBAanvraagFilterFormHelper(FormHelper):
     #    FieldWithButtons('dvom_verbalisant', StrictButton('Go!')),
     #)
 
+
+class BOBAanvraagStatusForm(forms.Form):
+    next_status = forms.ChoiceField(widget=forms.Select(), choices=[], required=True)
+    class Meta:
+        fields = ('next_status',)
+
+    def __init__(self, *args, **kwargs):
+
+        available_transitions = kwargs.pop('available_transitions')
+
+        super().__init__(*args, **kwargs)
+
+        self.fields['next_status'].choices = available_transitions
+
+        self.helper = FormHelper()
+        self.helper.form_action = "."
+        self.helper.form_id = 'aanvraagStatusFormId'
+        self.helper.attrs = {'novalidate': 'true'}
+        self.helper.layout = Layout(
+            Field('next_status', id="id_status"),
+            Submit('btn_submit_id', 'Verzenden &raquo;', id="id_btn_submit", css_class='btn-politie float-right btn-submit')
+        )
 

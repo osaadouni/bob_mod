@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django_fsm import FSMField, transition, has_transition_perm, get_all_FIELD_transitions, get_available_FIELD_transitions, get_available_user_FIELD_transitions
 
 
 
@@ -39,32 +40,42 @@ class BOBAanvraag(models.Model):
 
     # verlenging
     dvom_verlenging = models.BooleanField(choices=BOOL_CHOICES, verbose_name='Verlenging', default=False)
-    dvom_verlengingingaandop = models.DateField()
-    dvom_verlengingeinddatum = models.DateField()
+    dvom_verlengingingaandop = models.DateField(null=True, blank=True)
+    dvom_verlengingeinddatum = models.DateField(null=True, blank=True)
     dvom_verlenging_aantal = models.PositiveIntegerField('Periode verlenging (aantal)', default=0,
-                                validators=[MinValueValidator(1), MaxValueValidator(100)],
+                                                         blank=True, null=True,
+                                validators=[MinValueValidator(0), MaxValueValidator(100)],
                                 help_text="""Voor hoe lang wordt de verlenging van de handeling gevraagd 
                                              (aantal i.c.m.volgend veld)""")
 
-    dvom_verlenging_periode = models.CharField('Periode verlenging (eenheid)', max_length=2, choices=VERLENING_PERIODES,
-                                           help_text="""Eenheid van de periode waarvoor 
-                                           de verlenging van de handeling gevraagd wordt""")
+    dvom_verlenging_periode = models.CharField('Periode verlenging (eenheid)', max_length=2,
+                                               choices=VERLENING_PERIODES,
+                                               blank=True, null=True,
+                                               help_text="""Eenheid van de periode waarvoor 
+                                                            de verlenging van de handeling gevraagd wordt""")
 
 
     # Vordering tot machtiging
-    dvom_vtmstartdatum = models.DateField(verbose_name='VTMStartdatum / Op')
-    dvom_vtmeinddatum = models.DateField(verbose_name='VTMEinddatum')
+    dvom_vtmstartdatum = models.DateField(verbose_name='VTMStartdatum / Op', null=True, blank=True)
+    dvom_vtmeinddatum = models.DateField(verbose_name='VTMEinddatum', null=True, blank=True)
 
-    dvom_periode_aantal = models.PositiveIntegerField('Aantal (periode)', default=0,
-                                                         validators=[MinValueValidator(1), MaxValueValidator(100)],
+    dvom_periode_aantal = models.PositiveIntegerField('Aantal (periode)', default=0, null=True, blank=True,
+                                                         validators=[MinValueValidator(0), MaxValueValidator(100)],
                                                          help_text="""Periode vordering tot machtiging  
-                                             (aantal i.c.m.volgend veld)""")
+                                                                      (aantal i.c.m.volgend veld)""")
 
     dvom_periode_periode = models.CharField('Periode (eenheid)', max_length=2, choices=VERLENING_PERIODES,
-                                               help_text="""Eenheid van de periode tot vordering tot machtiging  
-                                           """)
+                                            null=True, blank=True,
+                                            help_text="""Eenheid van de periode tot vordering tot machtiging""")
 
     pdf_document = models.FileField('PDF Document', upload_to='documents/%Y/%m/%d', blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='bob_aanvragen', null=True,blank=True)
+
+    status = FSMField(default='aangemaakt')
 
     def __str__(self):
         return f"#{self.id}) - PV: {self.dvom_aanvraagpv}"
@@ -74,3 +85,13 @@ class BOBAanvraag(models.Model):
 
     def clean(self):
         print("BOBAanvraag::clean()...")
+
+
+    @transition(field=status, source='aangemaakt', target='ingediend')
+    def indienen(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag indienen...")

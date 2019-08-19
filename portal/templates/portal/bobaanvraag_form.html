@@ -18,7 +18,7 @@
             </div>
             <div class="card-body" >
 
-                {% crispy form %}
+                {% crispy form form.helper %}
 
                 {%  comment %}
                 <form method="post" action="" enctype="multipart/form-data" novalidate>
@@ -62,8 +62,9 @@
             $form = $('body').find('form');
 
             $('body').on('click', 'input[type=submit].btn-submit',function(e) {
+            //$('#aanvraagFormId').on('submit', function(e) {
                 e.preventDefault();
-                e.stopPropagation();
+                //e.stopPropagation();
                 $fields.each(function() {
                     val = $(this).val();
                     console.log('id: ', $(this).attr('id'), '; val: ', val);
@@ -72,7 +73,7 @@
                 if ($form[0].checkValidity() === false ) {
                     e.preventDefault();
                     e.stopPropagation();
-
+                    console.log('form not valid');
                     var elts = document.querySelectorAll('input.form-control:invalid, select.custom-select:invalid');
                     $('html, body').animate({
                         scrollTop: $(elts[0]).offset().top
@@ -82,7 +83,10 @@
 
                 }
 
-                return false;
+                console.log('Done. submit the form');
+                //return false;
+                $form.submit();
+                //return true;
             });
         }) ;
     });
