@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, TemplateView, View, FormView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
@@ -10,6 +10,7 @@ from django.core import paginator
 from django.core.paginator import Paginator, PageNotAnInteger
 from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 from django_filters.views import FilterView
+from django.contrib import  messages
 
 from resources.models import BOBAanvraag
 from resources.forms import BOBAanvraagForm, BOBAanvraagFilterFormHelper, BOBAanvraagStatusForm
@@ -104,22 +105,14 @@ class BOBAanvraagCreateView(LoginRequiredMixin,CreateView):
     def get_form(self, form_class=None):
         print("CreateView::get_form()")
         form = super().get_form()
-
-        #initial={'dvom_verbalisant': self.request.user.get_full_name(),
-        #         'dvom_verbalisantcontactgegevens': self.request.user.email,
-        #         }
-        #form = self.form_class(initial=initial)
-        #form.helper.form_action = reverse('portal:portal-create')
         return form
 
     def form_valid(self, form):
         print('form_valid()')
         self.object = form.save(commit=False)
-        self.object.user = self.request.user
+        self.object.owner = self.request.user
         self.object.save()
-
         return redirect(self.get_success_url())
-        #return super().form_valid(form)
 
     def form_invalid(self, form):
         print('form_invalid()')
@@ -148,18 +141,17 @@ class BOBAanvraagDetailDisplayView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         fields = [field.name for field in self.object._meta.fields]
         print(fields)
         context['fields'] = fields
         self.object = self.get_object()
-
         available_transitions = [(t.name, t.name) for t in self.object.get_available_user_status_transitions(user=self.request.user)]
         print(self.object)
-
         print(available_transitions)
-        context['form'] = BOBAanvraagStatusForm(available_transitions=available_transitions)
-
+        if len(available_transitions) > 0:
+            form = BOBAanvraagStatusForm(available_transitions=available_transitions)
+            form.helper.form_action = reverse('portal:portal-detail', args=[str(self.object.pk)])
+            context['form'] = form
         return context
 
 class BOBAanvraagDetailStatusView(LoginRequiredMixin, SingleTableView, FormView):
@@ -168,8 +160,27 @@ class BOBAanvraagDetailStatusView(LoginRequiredMixin, SingleTableView, FormView)
     model = BOBAanvraag
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        return super().post(request, *args, **kwargs)
+        """
+        Update de aanvraag status
+        :param request: HttpRequest object  containing POST parameters (eg.: next_status)
+        :param args: positional arguments
+        :param kwargs: keyword arguments (eg: pk)
+        :return:
+        """
+        next_status = self.request.POST.get('next_status', None)
+        pk = kwargs.get('pk', None)
+        aanvraag = get_object_or_404(BOBAanvraag, pk=pk)
+        self.object = aanvraag
+        if next_status is not None:
+            print(f"next_status: {next_status}")
+            transition = getattr(aanvraag, next_status)
+            print(f"transition: {transition}")
+            transition()
+            aanvraag.save()
+
+            messages.success(self.request, 'Aanvraag is successvol ingediend.')
+
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('portal:portal-detail', kwargs={'pk': self.object.pk})
@@ -180,6 +191,23 @@ class BOBAanvraagUpdateView(UpdateView):
     form_class = BOBAanvraagForm
     template_name = 'portal/bobaanvraag_form.html'
     success_url = reverse_lazy('portal:portal-list')
+
+    def get_form(self, form_class=None):
+        print("UpdateView::get_form()")
+        form = super().get_form()
+        form.helper.form_action = reverse('portal:portal-edit', kwargs={'pk': self.object.pk})
+        return form
+
+    def form_valid(self, form):
+        print('UpdateView::form_valid()')
+        self.object = form.save(commit=False)
+        self.object.owner = self.request.user
+        self.object.save()
+        messages.success(self.request, 'Aanvraag is successvol geupdate.')
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse_lazy('portal:portal-detail', args=[str(self.object.pk)])
 
 
 class BOBAanvraagDeleteView(DeleteView):
