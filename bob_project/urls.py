@@ -26,6 +26,7 @@ from home.views import HomeIndex
 urlpatterns = [
     path('', HomeIndex.as_view(),  name='home-index'),
     path('portal/', include('portal.urls')),
+    path('interception/', include('interception.urls')),
 
     path('accounts/', include('accounts.urls')),
     path('admin/', admin.site.urls),

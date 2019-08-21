@@ -6,7 +6,7 @@ class BOBAanvraagTable(tables.Table):
     class Meta:
         model = BOBAanvraag
         template_name = 'django_tables2/bootstrap-responsive.html'
-        fields = ('id', 'dvom_aanvraagpv', 'dvom_datumpv', 'dvom_verbalisant', 'dvom_verbalisantcontactgegevens',
+        fields = ('id', 'status', 'dvom_aanvraagpv', 'dvom_datumpv', 'dvom_verbalisant', 'dvom_verbalisantcontactgegevens',
                   'pdf_document', 'edit', 'view','delete')
 
 

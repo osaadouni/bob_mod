@@ -5,8 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from bootstrap_datepicker_plus import DatePickerInput
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div, Field
-from crispy_forms.bootstrap import FieldWithButtons,StrictButton
+from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div, Field, Button
+from crispy_forms.bootstrap import FieldWithButtons,StrictButton, AppendedText, PrependedText, PrependedAppendedText
 
 
 
@@ -39,13 +39,13 @@ class BOBAanvraagForm(forms.ModelForm):
         required=False,
     )
     dvom_vtmstartdatum = forms.DateField(
-        label='VTMStartdatum / op',
+        label='VTM Startdatum / op',
         widget=DatePickerInput(format='%d/%m/%Y'),
         help_text='Startdatum vordering tot machtiging',
         input_formats=settings.DATE_INPUT_FORMATS
     )
     dvom_vtmeinddatum = forms.DateField(
-        label='VTMEinddatum',
+        label='VTM Einddatum',
         widget=DatePickerInput(format='%d/%m/%Y'),
         help_text='Einddatum vordering tot machtiging',
         input_formats=settings.DATE_INPUT_FORMATS
@@ -182,7 +182,7 @@ class BOBAanvraagFilterFormHelper(FormHelper):
 
 
 class BOBAanvraagStatusForm(forms.Form):
-    next_status = forms.ChoiceField(widget=forms.Select(), choices=[], required=True)
+    next_status = forms.ChoiceField(label="Ik wil deze aanvraag: ", widget=forms.Select(), choices=[], required=True)
     class Meta:
         fields = ('next_status',)
 
@@ -195,11 +195,16 @@ class BOBAanvraagStatusForm(forms.Form):
         self.fields['next_status'].choices = available_transitions
 
         self.helper = FormHelper()
+        self.helper.form_class = 'inline-form'
         self.helper.form_action = "."
         self.helper.form_id = 'aanvraagStatusFormId'
         self.helper.attrs = {'novalidate': 'true'}
         self.helper.layout = Layout(
-            Field('next_status', id="id_status"),
-            Submit('btn_submit_id', 'Verzenden &raquo;', id="id_btn_submit", css_class='btn-politie float-right btn-submit')
+            Row(
+                Column('next_status', css_class="col-sm-4"),
+                Column(Submit('btn_submit_id', 'Verzenden &raquo;', id="id_btn_submit",
+               css_class='btn-politie  btn-submit ')),
+                css_class="row-form d-flex justify-content-end align-items-end"
+            )
         )
 
