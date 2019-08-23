@@ -72,3 +72,4 @@ fabric.properties
 
 .venv
 
+db.sqlite3
