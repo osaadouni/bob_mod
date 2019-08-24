@@ -32,8 +32,35 @@ class Command(BaseCommand):
     help = 'Creates read only default permissions for groups of users'
 
     def handle(self, *args, **options):
+        for group in GROUPS:
+            new_group , created = Group.objects.get_or_create(name=group)
+            for app_label,model_name in MODELS.items():
+                for permission in PERMISSIONS:
+                    codename = 'can_{}_{}'.format(permission, model_name)
+                    name = 'Can {} {}'.format(permission, model_name)
+                    print("Creating {}".format(name))
+
+                    try:
+                        model_add_perm = Permission.objects.get(name=name)
+                    except Permission.DoesNotExist:
+                        logging.warning('Permission not found with name "{}".'.format(name))
+
+                        model = apps.get_model(app_label, model_name)
+                        ct = ContentType.objects.get_for_model(model)
+
+                        model_add_perm = Permission.objects.create(codename=codename,
+                                                                   name=name,
+                                                                   content_type=ct)
+                        logging.warning('Permission not found with name "{}".'.format(name))
+                        #continue
+
+                    new_group.permissions.add(model_add_perm)
+
+        print("Created default group and permissions")
+
         for group_name, user_names in GROUP_USERS.items():
-            group , created = Group.objects.get_or_create(name=group_name)
+            group = Group.objects.get(name=group_name)
+
             for username in user_names:
                 email = '{}@test.com'.format(username)
                 password = 'testme123'
