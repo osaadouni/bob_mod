@@ -172,7 +172,7 @@ class BOBAanvraagDeleteView(LoginRequiredMixin, BaseClassView, DeleteView):
         return reverse_lazy(f'{self.app_name}:{self.app_name}-list')
 
 
-class BOBAanvraagListView(LoginRequiredMixin, SingleTableView, FilterView):
+class BOBAanvraagListView(LoginRequiredMixin, SingleTableView, BaseClassView, FilterView):
     model = BOBAanvraag
     template_name = 'portal/bobaanvraag_list.html'
     table_class = BOBAanvraagTable
