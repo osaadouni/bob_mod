@@ -1,0 +1,28 @@
+        {% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container">
+    <br>  <p class="text-center">Welkom op het BOB-portal</p>
+    <hr>
+
+    <div class="row justify-content-md-center mt-5">
+        <aside class="col col-md-4 col-sm-12 col-xs-12">
+            <div class="card">
+                <article class="card-body">
+                    <img class="float-right" src="https://data.politie.nl/Content/image/politie/politie_logo.svg" alt="" width="80" height="30">
+                    <h4 class="card-title mb-4 mt-1">Inloggen</h4>
+                    {% crispy form %}
+                </article>
+            </div> <!-- card.// -->
+
+        </aside> <!-- col.// -->
+
+    </div> <!-- row.// -->
+
+</div>
+<!--container end.//-->
+
+{% endblock %}

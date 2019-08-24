@@ -49,6 +49,10 @@ INSTALLED_APPS = [
 
 
     # local
+    'accounts',
+    'home',
+    'portal',
+    'interception',
 ]
 
 MIDDLEWARE = [
@@ -156,7 +160,8 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Login url
-LOGIN_URL = '/' # defined by named URL pattern
+# default: LOGIN_URL = '/accounts/login/'
+LOGIN_URL = 'accounts:login' # defined by named URL pattern
 
 
 # For testing. Log any emails sent to the console

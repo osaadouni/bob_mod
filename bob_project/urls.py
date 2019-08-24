@@ -15,12 +15,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth.views import LoginView
 from django.conf import settings
 from django.conf.urls.static import static
 
+from home.views import HomeIndex
 
 
 urlpatterns = [
+    path('', HomeIndex.as_view(),  name='home-index'),
+    path('accounts/', include('accounts.urls')),
+    path('portal/', include('portal.urls')),
+    path('interception/', include('interception.urls')),
+
     path('admin/', admin.site.urls),
 ]
 
