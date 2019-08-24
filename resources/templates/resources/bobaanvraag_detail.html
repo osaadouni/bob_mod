@@ -8,10 +8,12 @@
     <div class="card mb-5">
         <div class="card-header">
             BOB handeling detail (ID: #{{ object.pk }})
-            <a href="{% url 'portal:index' %}" class="btn btn-primary btn-sm float-right btn-politie" role="button">
+            {% with app_name|add:":index" as home_url %}
+            <a href="{% url home_url %}" class="btn btn-primary btn-sm float-right btn-politie" role="button">
                 <i class="fa fa-list" aria-hidden="true"></i>
                 Werkvoorraad
             </a>
+            {% endwith %}
         </div>
         <div class="card-body">
 

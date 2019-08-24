@@ -1,4 +1,4 @@
-    {% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -30,11 +30,6 @@
   <!-- jQuery & Bootstrap JS -->
   {% block javascript %}
 
-    {%  comment %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    {% endcomment %}
-
     <script src="{% static "js/jquery-3.4.1.min.js" %}"></script>
     <script src="{% static "js/popper.min.js" %}"></script>
     <script src="{% static "js/bootstrap.min.js" %}"></script>
@@ -49,17 +44,19 @@
   <div class="d-flex" id="wrapper">
 
   {%  if user.is_authenticated  %}
-    <!-- Sidebar -->
-    <div class="bg-light border-right" id="sidebar-wrapper">
-      <div class="sidebar-heading">BOB Module </div>
-      <div class="list-group list-group-flush">
-        <a href="{% url 'home-index' %}" class="list-group-item list-group-item-action bg-light">Home</a>
-        <a href="{% url 'portal:portal-create' %}" class="list-group-item list-group-item-action bg-light">Nieuwe Aanvraag</a>
+        
+        <!-- Sidebar -->
+        <div class="bg-light border-right" id="sidebar-wrapper">
+          <div class="sidebar-heading">BOB Module </div>
+          <div class="list-group list-group-flush">
 
+            {% with "includes/nav_"|add:app_name|add:".html" as nav_template %}
+                {% include nav_template with app_name=app_name %}
+            {% endwith %}
 
-      </div>
-    </div>
-    <!-- /#sidebar-wrapper -->
+          </div>
+        </div>
+        <!-- /#sidebar-wrapper -->
   {% endif %}
 
     <!-- Page Content -->
