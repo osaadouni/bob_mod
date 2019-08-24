@@ -7,7 +7,7 @@
     <div class="card" >
         <div class="card-header">
             BOB handeling delete (ID: #{{ object.id }})
-            <a href="{% url 'portal:index' %}" class="btn btn-primary btn-sm float-right" role="button">
+            <a href="{% url 'portal:portal-list' %}" class="btn btn-primary btn-sm float-right" role="button">
                 <i class="fa fa-list" aria-hidden="true"></i>
                 Werkvoorraad
             </a>
@@ -17,7 +17,7 @@
                 {% csrf_token %}
                 <div class="alert alert-warning">Bevestig uw verwijder actie van het object "{{ object }}" AUB.</div>
                 <small class="float-sm-right">
-                    <a href="{% url 'portal:index' %}" class="btn btn-secondary">Annuleren <i class="fa fa-times"></i></a>
+                    <a href="{% url 'portal:portal-list' %}" class="btn btn-secondary">Annuleren <i class="fa fa-times"></i></a>
 
                     <button type="submit" class="btn btn-danger">Ja <i class="fa fa-check" aria-hidden="true"></i> </button>
                 </small>

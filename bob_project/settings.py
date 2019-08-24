@@ -189,3 +189,7 @@ DATE_INPUT_FORMATS = [
     '%m/%d/%y',
     '%d/%m/%Y',
 ]
+
+
+# set the django tables2 template 
+DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap4.html'

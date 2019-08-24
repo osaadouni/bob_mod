@@ -1,1 +1,3 @@
-<a class="btn btn-info btn-sm"  href="{% url 'portal:portal-edit' record.id %}">Edit </a>
+{% if record.is_editable %}
+<a class="btn btn-info btn-sm text-nowrap"  href="{% url 'portal:portal-edit' record.id %}">Edit <i class="fa fa-pencil"></i> </a>
+{% endif %}

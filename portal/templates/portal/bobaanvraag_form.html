@@ -6,11 +6,21 @@
 
     <div class="container-fluid mt-3">
 
-        {% comment %}{% include 'portal/mdb_form.html' %} {% endcomment %}
+          <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Nieuwe/Aanpassen aanvraag</li>
+          </ol>
+        </nav>
+
 
         <div class="card mb-3" >
             <div class="card-header">
                 BOB aanvraag formulier
+                <a href="{% url 'portal:portal-list' %}" class="btn btn-primary btn-sm float-right btn-politie" role="button">
+                    <i class="fa fa-list" aria-hidden="true"></i>
+                    Werkvoorraad
+                </a>
+
             </div>
             <div class="card-body" >
 

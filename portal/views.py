@@ -1,14 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import TemplateView, DetailView, View, FormView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, DetailView, View, FormView, ListView
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
+from django.core import paginator
+from django.core.paginator import Paginator, PageNotAnInteger
+from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
+from django_filters.views import FilterView
+
+
 
 from resources.models import BOBAanvraag
-from resources.forms import BOBAanvraagForm, BOBAanvraagStatusForm
+from resources.forms import BOBAanvraagForm, BOBAanvraagStatusForm, BOBAanvraagFilterFormHelper
+from resources.tables import BOBAanvraagTable
+from resources.filters import BOBAanvraagFilter
 
 
 # Create your views here.
@@ -145,7 +153,34 @@ class BOBAanvraagUpdateView(UpdateView):
 class BOBAanvraagDeleteView(DeleteView):
     model = BOBAanvraag
     template_name = 'portal/bobaanvraag_confirm_delete.html'
-    success_url = reverse_lazy('portal:index')
+    success_url = reverse_lazy('portal:portal-list')
 
+
+class BOBAanvraagListView(LoginRequiredMixin, SingleTableView, FilterView):
+    model = BOBAanvraag
+    template_name = 'portal/bobaanvraag_list.html'
+    table_class = BOBAanvraagTable
+    context_filter_name = 'filter'
+
+
+    #ordering = ['-pk']
+    paginate_by = 5
+
+    filterset_class = BOBAanvraagFilter
+    formhelper_class = BOBAanvraagFilterFormHelper
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset()
+        self.filter = self.filterset_class(self.request.GET, queryset=qs)
+        self.filter.form.helper = self.formhelper_class()
+        return self.filter.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        table = BOBAanvraagTable(self.get_queryset(**kwargs))
+        RequestConfig(self.request, paginate={'per_page': self.paginate_by}).configure(table)
+        context['object_list'] = table
+        context[self.context_filter_name] = self.filter
+        return context
 
 

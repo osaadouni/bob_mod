@@ -1,1 +1,3 @@
-<a class="btn btn-primary btn-sm"  href="{% url 'portal:portal-detail' record.id %}"> View </a>
+{% if record.is_editable %}
+<a class="btn btn-primary btn-sm text-nowrap"  href="{% url 'portal:portal-detail' record.id %}"> View <i class="fa fa-eye"></i></a>
+{% endif %}

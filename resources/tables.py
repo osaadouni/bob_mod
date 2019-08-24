@@ -5,9 +5,10 @@ from .models import BOBAanvraag
 class BOBAanvraagTable(tables.Table):
     class Meta:
         model = BOBAanvraag
-        template_name = 'django_tables2/bootstrap-responsive.html'
+        #template_name = 'django_tables2/bootstrap-responsive.html'
+        template_name = 'django_tables2/bootstrap4.html'
         fields = ('id', 'status', 'dvom_aanvraagpv', 'dvom_datumpv', 'dvom_verbalisant', 'dvom_verbalisantcontactgegevens',
-                  'pdf_document', 'edit', 'view','delete')
+                  'pdf_document', 'owner', 'edit', 'view','delete')
 
 
         attrs = {
@@ -22,7 +23,7 @@ class BOBAanvraagTable(tables.Table):
             'td': {
                 'class': 'p-2'
             },
-            'class': 'table-bordered'
+            'class': 'table-bordered table-responsive mb-3'
         }
 
     edit = TemplateColumn(template_name='resources/bobaanvraag_update_column.html')

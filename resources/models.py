@@ -95,3 +95,14 @@ class BOBAanvraag(models.Model):
         :return: value will be discarded.
         """
         print("Aanvraag indienen...")
+
+
+    @property
+    def is_editable(self):
+        generator = self.get_available_user_status_transitions(user=self.owner)
+        available_transitions = [(t.name, t.name) for t in generator]
+        if len(available_transitions)>0:
+            return True
+        return False
+
+    
