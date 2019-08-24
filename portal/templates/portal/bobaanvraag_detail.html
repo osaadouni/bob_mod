@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load getattribute %}
+{% load verbose_names %}
+
+{% block content %}
+    <div class="container-fluid mt-3">
+    <div class="card mb-5">
+        <div class="card-header">
+            BOB handeling detail (ID: #{{ object.pk }})
+            <a href="{% url 'portal:index' %}" class="btn btn-primary btn-sm float-right btn-politie" role="button">
+                <i class="fa fa-list" aria-hidden="true"></i>
+                Werkvoorraad
+            </a>
+        </div>
+        <div class="card-body">
+
+            {% if messsages %}
+                {% for message in messages %}
+                <div class="alert alert-success">
+                    {{ message.tags }} - {{ message }}
+
+
+                </div>
+                {% endfor %}
+            {% endif  %}
+            {% for attr in fields %}
+            <div class="row">
+                <div class="col-sm-4">
+                     {{ attr }} - {# {% get_field_verbose_name object attr %} #}
+                </div>
+                <div class="col">
+                    {{ object|getattribute:attr }}
+                </div>
+            </div>
+            {% endfor %}
+
+
+            {% if form %}
+                <hr class="mb-4"/>
+                {% crispy form %}
+            {% endif %}
+
+      </div>
+    </div>
+
+    </div>
+
+{% endblock %}
