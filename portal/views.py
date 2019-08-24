@@ -4,7 +4,7 @@ from django.views.generic import TemplateView, DetailView, View, FormView, ListV
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy, resolve
 from django.contrib import messages
 from django.core import paginator
 from django.core.paginator import Paginator, PageNotAnInteger
@@ -19,16 +19,28 @@ from resources.tables import BOBAanvraagTable
 from resources.filters import BOBAanvraagFilter
 
 
-# Create your views here.
-class PortalIndexView(LoginRequiredMixin, TemplateView):
-    template_name = 'portal/index.html'
+class BaseClassView(View):
+    def dispatch(self, request, *args, **kwargs):
+        self.app_name = resolve(self.request.path).app_name
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['app_name'] = self.app_name 
+        return context
 
 
-class BOBAanvraagCreateView(LoginRequiredMixin,CreateView):
+class PortalIndexView(LoginRequiredMixin, BaseClassView, TemplateView):
+    template_name = None
+
+    def get_template_names(self):
+        return  f'{self.app_name}/index.html'
+
+
+class BOBAanvraagCreateView(LoginRequiredMixin, BaseClassView, CreateView):
     model = BOBAanvraag
-    template_name = 'portal/bobaanvraag_form.html'
+    template_name = 'resources/bobaanvraag_form.html'
     form_class = BOBAanvraagForm
-
 
     def get_initial(self):
         """
@@ -40,6 +52,7 @@ class BOBAanvraagCreateView(LoginRequiredMixin,CreateView):
         initial = initial.copy()
         initial['dvom_verbalisant'] = self.request.user.get_full_name()
         initial['dvom_verbalisantcontactgegevens'] = self.request.user.email
+
         return initial
 
     def get_form(self, form_class=None):
@@ -60,7 +73,7 @@ class BOBAanvraagCreateView(LoginRequiredMixin,CreateView):
         return super().form_invalid(form)
 
     def get_success_url(self):
-        return reverse_lazy('portal:portal-detail', args=[str(self.object.pk)])
+        return reverse_lazy('{app_name}:{app_name}-detail'.format(app_name=self.app_name), args=[str(self.object.pk)])
 
 
 class BOBAanvraagDetailView(LoginRequiredMixin, View):
@@ -75,9 +88,9 @@ class BOBAanvraagDetailView(LoginRequiredMixin, View):
 
 
 
-class BOBAanvraagDetailDisplayView(LoginRequiredMixin, DetailView):
+class BOBAanvraagDetailDisplayView(LoginRequiredMixin, BaseClassView, DetailView):
     model = BOBAanvraag
-    template_name = 'portal/bobaanvraag_detail.html'
+    template_name = 'resources/bobaanvraag_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -90,13 +103,14 @@ class BOBAanvraagDetailDisplayView(LoginRequiredMixin, DetailView):
         print(available_transitions)
         if len(available_transitions) > 0:
             form = BOBAanvraagStatusForm(available_transitions=available_transitions)
-            form.helper.form_action = reverse('portal:portal-detail', args=[str(self.object.pk)])
+            form.helper.form_action = reverse('{app_name}:{app_name}-detail'.format(app_name=self.app_name), args=[str(self.object.pk)])
             context['form'] = form
+    
         return context
 
 
-class BOBAanvraagDetailStatusView(LoginRequiredMixin, FormView):
-    template_name = 'portal/bobaanvraag_detail.html'
+class BOBAanvraagDetailStatusView(LoginRequiredMixin, BaseClassView, FormView):
+    template_name = 'resources/bobaanvraag_detail.html'
     form_classs = BOBAanvraagStatusForm
     model = BOBAanvraag
 
@@ -124,18 +138,18 @@ class BOBAanvraagDetailStatusView(LoginRequiredMixin, FormView):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('portal:portal-detail', kwargs={'pk': self.object.pk})
+        return reverse(f'{self.app_name}:{self.app_name}-detail', kwargs={'pk': self.object.pk})
 
 
-class BOBAanvraagUpdateView(UpdateView):
+class BOBAanvraagUpdateView(LoginRequiredMixin, BaseClassView, UpdateView):
     model = BOBAanvraag
     form_class = BOBAanvraagForm
-    template_name = 'portal/bobaanvraag_form.html'
+    template_name = 'resources/bobaanvraag_form.html'
 
     def get_form(self, form_class=None):
         print("UpdateView::get_form()")
         form = super().get_form()
-        form.helper.form_action = reverse('portal:portal-edit', kwargs={'pk': self.object.pk})
+        form.helper.form_action = reverse(f'{self.app_name}:{self.app_name}-edit', kwargs={'pk': self.object.pk})
         return form
 
     def form_valid(self, form):
@@ -147,13 +161,15 @@ class BOBAanvraagUpdateView(UpdateView):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse_lazy('portal:portal-detail', args=[str(self.object.pk)])
+        return reverse_lazy(f'{self.app_name}:{self.app_name}-detail', args=[str(self.object.pk)])
 
 
-class BOBAanvraagDeleteView(DeleteView):
+class BOBAanvraagDeleteView(LoginRequiredMixin, BaseClassView, DeleteView):
     model = BOBAanvraag
-    template_name = 'portal/bobaanvraag_confirm_delete.html'
-    success_url = reverse_lazy('portal:portal-list')
+    template_name = 'resources/bobaanvraag_confirm_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy(f'{self.app_name}:{self.app_name}-list')
 
 
 class BOBAanvraagListView(LoginRequiredMixin, SingleTableView, FilterView):
@@ -161,7 +177,6 @@ class BOBAanvraagListView(LoginRequiredMixin, SingleTableView, FilterView):
     template_name = 'portal/bobaanvraag_list.html'
     table_class = BOBAanvraagTable
     context_filter_name = 'filter'
-
 
     #ordering = ['-pk']
     paginate_by = 5

@@ -7,17 +7,21 @@
     <div class="card" >
         <div class="card-header">
             BOB handeling delete (ID: #{{ object.id }})
-            <a href="{% url 'portal:portal-list' %}" class="btn btn-primary btn-sm float-right" role="button">
-                <i class="fa fa-list" aria-hidden="true"></i>
-                Werkvoorraad
-            </a>
+            {% with app_name|add:':index' as url_var %}
+                <a href="{% url url_var %}" class="btn btn-primary btn-sm float-right" role="button">
+                    <i class="fa fa-list" aria-hidden="true"></i>
+                    Werkvoorraad
+                </a>
+            {% endwith %}
         </div>
         <div class="card-body">
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="alert alert-warning">Bevestig uw verwijder actie van het object "{{ object }}" AUB.</div>
                 <small class="float-sm-right">
-                    <a href="{% url 'portal:portal-list' %}" class="btn btn-secondary">Annuleren <i class="fa fa-times"></i></a>
+                    {% with app_name|add:':index' as url_var %}
+                    <a href="{% url url_var  %}" class="btn btn-secondary">Annuleren <i class="fa fa-times"></i></a>
+                    {% endwith %}
 
                     <button type="submit" class="btn btn-danger">Ja <i class="fa fa-check" aria-hidden="true"></i> </button>
                 </small>

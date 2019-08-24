@@ -73,3 +73,5 @@ fabric.properties
 .venv
 
 db.sqlite3
+
+media/documents
