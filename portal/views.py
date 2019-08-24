@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, DetailView, View, FormView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
@@ -117,4 +117,35 @@ class BOBAanvraagDetailStatusView(LoginRequiredMixin, FormView):
 
     def get_success_url(self):
         return reverse('portal:portal-detail', kwargs={'pk': self.object.pk})
+
+
+class BOBAanvraagUpdateView(UpdateView):
+    model = BOBAanvraag
+    form_class = BOBAanvraagForm
+    template_name = 'portal/bobaanvraag_form.html'
+
+    def get_form(self, form_class=None):
+        print("UpdateView::get_form()")
+        form = super().get_form()
+        form.helper.form_action = reverse('portal:portal-edit', kwargs={'pk': self.object.pk})
+        return form
+
+    def form_valid(self, form):
+        print('UpdateView::form_valid()')
+        self.object = form.save(commit=False)
+        self.object.owner = self.request.user
+        self.object.save()
+        messages.success(self.request, 'Aanvraag is successvol geupdate.')
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse_lazy('portal:portal-detail', args=[str(self.object.pk)])
+
+
+class BOBAanvraagDeleteView(DeleteView):
+    model = BOBAanvraag
+    template_name = 'portal/bobaanvraag_confirm_delete.html'
+    success_url = reverse_lazy('portal:index')
+
+
 

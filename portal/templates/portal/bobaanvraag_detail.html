@@ -41,6 +41,15 @@
             {% endif %}
 
       </div>
+      <div class="card-footer">
+            {% if form %}
+            <div class="d-flex">
+                <a href="{% url 'portal:portal-edit' object.pk %}" class="btn btn-primary mr-auto">Aanpassen <i class="fa fa-pencil"></i></a>
+                <a href="{% url 'portal:portal-delete' object.pk %}" class="btn btn-danger">Verwijderen <i class="fa fa-trash-o"></i></a>
+            </div>
+            {% endif %}
+            
+      </div>
     </div>
 
     </div>

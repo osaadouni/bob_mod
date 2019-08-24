@@ -16,30 +16,6 @@
 
                 {% crispy form form.helper %}
 
-                {%  comment %}
-                <form method="post" action="" enctype="multipart/form-data" novalidate>
-
-                    {% csrf_token %}
-
-                    {% for field in form  %}
-                        {% if not forloop.counter|divisibleby:2 %}
-                            <div class="form-row">
-                        {% endif %}
-                        <div class="form-group col-sm-6 mb-0 ">
-                           {{ field|as_crispy_field }}
-                        </div>
-                        {% if forloop.counter|divisibleby:2 %}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-
-                    {{ form|crispy }}
-
-                    <button type="submit" class="btn btn-primary">Opslaan</button>
-                </form>
-
-                {% endcomment %}
-
             </div> <!-- /.card-body -->
         </div> <!-- /.card -->
 
