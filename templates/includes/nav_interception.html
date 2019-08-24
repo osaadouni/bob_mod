@@ -1,0 +1,11 @@
+
+ {% with app_name|add:":"|add:"index" as home_url %}
+  <a href="{% url home_url %}" class="list-group-item list-group-item-action bg-light">Home</a>
+ {% endwith %}
+
+
+ {% with app_name|add:":"|add:app_name|add:"-create" as create_url %}
+  <a href="{% url create_url %}" class="list-group-item list-group-item-action bg-light">Nieuwe Aanvraag</a>
+ {% endwith %}
+
+
