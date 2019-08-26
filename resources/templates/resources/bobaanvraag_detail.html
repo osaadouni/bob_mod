@@ -8,7 +8,7 @@
     <div class="card mb-5">
         <div class="card-header">
             BOB handeling detail (ID: #{{ object.pk }})
-            {% with app_name|add:":index" as home_url %}
+            {% with app_name|add:":"|add:app_name|add:"-list" as home_url %}
             <a href="{% url home_url %}" class="btn btn-primary btn-sm float-right btn-politie" role="button">
                 <i class="fa fa-list" aria-hidden="true"></i>
                 Werkvoorraad
@@ -46,8 +46,12 @@
       {% if form %}
       <div class="card-footer">
             <div class="d-flex">
-                <a href="{% url 'portal:portal-edit' object.pk %}" class="btn btn-primary mr-auto">Aanpassen <i class="fa fa-pencil"></i></a>
-                <a href="{% url 'portal:portal-delete' object.pk %}" class="btn btn-danger">Verwijderen <i class="fa fa-trash-o"></i></a>
+                {% with app_name|add:":"|add:app_name|add:"-edit" as edit_url %}
+                   <a href="{% url edit_url object.pk %}" class="btn btn-primary mr-auto">Aanpassen <i class="fa fa-pencil"></i></a>
+                {% endwith %}
+                {% with app_name|add:":"|add:app_name|add:"-delete" as delete_url %}
+                   <a href="{% url delete_url object.pk %}" class="btn btn-danger">Verwijderen <i class="fa fa-trash-o"></i></a>
+                {% endwith %}
             </div>
             
       </div>

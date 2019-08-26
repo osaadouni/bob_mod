@@ -1,0 +1,19 @@
+<div class="btn-group" role="group" aria-label="Button actions">
+
+    {% with app_name|add:":"|add:app_name|add:"-detail" as detail_url %}
+        <a class="btn btn-primary btn-sm text-nowrap"  href="{% url detail_url record.id %}"> Open&nbsp;<i class="fa fa-folder-open"></i></a>
+    {% endwith %}
+
+    {% if user.is_idesk_member or record.is_editable %}
+      {% with app_name|add:":"|add:app_name|add:"-edit" as edit_url %}
+         <a class="btn btn-info btn-sm text-nowrap"  href="{% url edit_url record.id %}">Wijzig <i class="fa fa-pencil"></i> </a>
+      {% endwith %}
+    {% endif %}
+
+     {% if user.is_idesk_member or record.is_editable %}
+      {% with app_name|add:":"|add:app_name|add:"-delete" as delete_url %}
+        <a class="btn btn-danger btn-sm text-nowrap"  href="{% url delete_url record.id %}"> Verwijder <i class="fa fa-trash-o"></i> </a>
+      {% endwith %}
+    {% endif %}
+                   
+</div>

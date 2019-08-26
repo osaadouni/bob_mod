@@ -14,13 +14,14 @@
 
 
         <div class="card-header">
-            BOB werkvoorraad
-            <a href="{% url 'portal:portal-create' %}" class="btn btn-primary btn-sm float-right" role="button">
+            BOB werkvoorraad 
+            {% with app_name|add:":"|add:app_name|add:"-create" as create_url %}
+            <a href="{% url create_url %}" class="btn btn-primary btn-sm float-right" role="button">
                 <i class="fa fa-list" aria-hidden="true"></i>
                 Nieuwe BOB aanvraag
             </a>
+            {% endwith %}
         </div>
-    
         <div class="card-body">
             {% if filter %}
                 <div class="container-fluid text-left ml-0 pl-0">
@@ -31,7 +32,7 @@
                     </div>
                 </div>
             {% endif %}
-        
+            
             {% if object_list.rows %}
                  {% render_table object_list %}
             {% else %}
@@ -39,7 +40,6 @@
             {% endif %}
 
         </div>
-
     </div>
 
     </div>

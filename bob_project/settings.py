@@ -25,7 +25,7 @@ SECRET_KEY = 'p29vwjkkws3p4-6a*6@c@jeo&j^v%w41zw)%4_s$wv6vz)5s4o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.10', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django_filters',
     'django_fsm',
     'django_fsm_log',
+    'django_extensions',
 
 
     # local
@@ -193,3 +194,14 @@ DATE_INPUT_FORMATS = [
 
 # set the django tables2 template 
 DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap4.html'
+
+
+
+# Custom User Model
+AUTH_USER_MODEL = 'accounts.User'
+
+
+
+# filters settings 
+FILTERS_EMPTY_CHOICE_LABEL = None
+

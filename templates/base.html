@@ -22,7 +22,7 @@
   <!-- Custom styles for this template -->
   {% block stylesheet %}
   <!-- MDB CSS -->
-  <link href="{% static  "css/mdb/mdb.min.css" %}" rel="stylesheet">
+  {% comment %}<link href="{% static  "css/mdb/mdb.min.css" %}" rel="stylesheet"> {% endcomment %}
 
   <link href="{% static  "css/sidebar.css" %}" rel="stylesheet">
   {% endblock %}
@@ -33,7 +33,7 @@
     <script src="{% static "js/jquery-3.4.1.min.js" %}"></script>
     <script src="{% static "js/popper.min.js" %}"></script>
     <script src="{% static "js/bootstrap.min.js" %}"></script>
-    <script src="{% static "js/mdb.min.js" %}"></script>
+    {% comment %} <script src="{% static "js/mdb.min.js" %}"></script> {% endcomment %}
 
    {% endblock %}
 

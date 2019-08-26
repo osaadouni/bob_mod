@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+    <div class="container-fluid mt-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Overzicht aanvragen</li>
+          </ol>
+        </nav>
+    <div class="card mb-3">
+
+
+        <div class="card-header">
+            BOB werkvoorraad 
+            {% with app_name|add:":"|add:app_name|add:"-create" as create_url %}
+            <a href="{% url create_url %}" class="btn btn-primary btn-sm float-right" role="button">
+                <i class="fa fa-list" aria-hidden="true"></i>
+                Nieuwe BOB aanvraag
+            </a>
+            {% endwith %}
+        </div>
+        <div class="card-body">
+        {% if filter %}
+            {% crispy filter.form filter.form.helper %}
+        {% endif %}
+        {% if object_list %}
+             {% render_table object_list %}
+        {% else %}
+            <p>Geen PV aanvragen gevonden.</p>
+        {% endif %}
+
+        </div>
+    </div>
+
+    </div>
+
+    {{ form.media }}            {# Adds date-picker required JS and CSS #}
+
+{% endblock %}

@@ -1,8 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.urls import reverse
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django_fsm import FSMField, transition, has_transition_perm, get_all_FIELD_transitions, get_available_FIELD_transitions, get_available_user_FIELD_transitions
+
+from .transitions import TRANS_HUMAN
+from accounts.groups import VERBALISANT_GROUPS, INTERCEPTIE_GROUPS
+
 
 
 
@@ -21,6 +25,45 @@ def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
     #return 'user_{0}/{1}'.format(instance.user.id, filename)
     return 'user_{0}/{1}'.format(instance.user.username, filename)
+
+
+class InterDeskQuerySet(models.QuerySet):
+    def verb_aanvraag_queryset(self):
+        #return self.exclude(created_by__is_verbalisastatus='aangemaakt')
+        qs = self.all()
+        #users = [(q.created_by, q.created_by.is_verbalisant) for q in qs if q.created_by is not None and not(q.status=='aangemaakt'  and q.created_by.is_verbalisant)]
+        #print(f"users: {users}")
+        #filtered = [q.created_by for q in qs if q.created_by is not None and not(q.status=='aangemaakt'  and q.created_by.is_verbalisant)]
+        #print(f"filtered: {filtered}")
+        #return qs.filter(created_by__in=filtered) 
+        
+        filtered = [q.created_by for q in qs if q.created_by is not None and q.status=='aangemaakt'  and q.created_by.is_verbalisant]
+        print(f"filtered: {filtered}")
+        return qs.exclude(created_by__in=filtered) 
+    
+
+class InterDeskManager(models.Manager):
+
+    def get_queryset(self):
+        return InterDeskQuerySet(self.model, using=self._db)
+
+    def verb_aanvragen(self):
+        return self.get_queryset().verb_aanvraag_queryset()
+        
+
+class VerbalisantQuerySet(models.QuerySet):
+    def verb_aanvraag_queryset(self, user):
+        return self.filter(created_by=user)
+    
+
+class VerbalisantManager(models.Manager):
+
+    def get_queryset(self):
+        return VerbalisantQuerySet(self.model, using=self._db)
+
+    def verb_aanvragen(self, user):
+        return self.get_queryset().verb_aanvraag_queryset(user)
+        
 
 
 class BOBAanvraag(models.Model):
@@ -70,12 +113,22 @@ class BOBAanvraag(models.Model):
 
     pdf_document = models.FileField('PDF Document', upload_to='documents/%Y/%m/%d', blank=True, null=True)
 
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='created_aanvragen', null=True,blank=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='updated_aanvragen', null=True,blank=True)
+
+    status = FSMField(default='aangemaakt')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    owner = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='bob_aanvragen', null=True,blank=True)
+    # custom managers
+    objects = models.Manager()
+    interdesk_manager = InterDeskManager()
+    verb_manager = VerbalisantManager()
 
-    status = FSMField(default='aangemaakt')
+
+    class Meta:
+        verbose_name_plural = 'BOB aanvragen'
 
     def __str__(self):
         return f"#{self.id}) - PV: {self.dvom_aanvraagpv}"
@@ -87,7 +140,9 @@ class BOBAanvraag(models.Model):
         print("BOBAanvraag::clean()...")
 
 
-    @transition(field=status, source='aangemaakt', target='ingediend')
+    # aangemaakt -> * 
+    @transition(field=status, source='aangemaakt', target='ingediend',
+                permission=lambda instance, user: user.has_perm('resources.can_indienen'))
     def indienen(self):
         """
         This function may contain side-effects,
@@ -96,13 +151,114 @@ class BOBAanvraag(models.Model):
         """
         print("Aanvraag indienen...")
 
+    @transition(field=status, source='aangemaakt', target='geannuleerd', 
+                permission=lambda instance, user: user.has_perm('resources.can_annuleren'))
+    def annuleren(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag annuleren...")
+
+    # ingediend -> * 
+    @transition(field=status, source='ingediend', target='inbehandeling',
+                permission=lambda instance, user: user.has_perm('resources.can_behandelen'))
+    def behandelen(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag behandelen...")
+        
+
+    # inbehandling -> * 
+    @transition(field=status, source=['inbehandeling'], target='goedgekeurd', 
+                permission=lambda instance, user: user.has_perm('resources.can_goedkeuren'))
+    def goedkeuren(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag goedkeuren...")
+
+    @transition(field=status, source=['inbehandeling'], target='afgekeurd',
+                permission=lambda instance, user: user.has_perm('resources.can_afkeuren'))
+    def afkeuren(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag afkeuren...")
+
+
+    @transition(field=status, source='inbehandeling', target='afgerond', 
+                permission=lambda instance, user: user.has_perm('resources.can_afronden'))
+    def afronden(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag afronden...")
+
+    @transition(field=status, source=['ingediend', 'inbehandeling'], target='in_de_wacht',
+                permission=lambda instance, user: user.has_perm('resources.can_in_de_wacht_zetten'))
+    def in_de_wacht_zetten(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag in de wacht zetten...")
+
+        
+    @transition(field=status, source='goedgekeurd', target='verzonden_OM',
+                permission=lambda instance, user: user.has_perm('resources.can_verzenden_om'))
+    def verzenden_OM(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag verzenden naar OM...")
+        
+
+    @transition(field=status, source='verzonden_OM', target='goedgekeurd_OM',
+                permission=lambda instance, user: user.has_perm('resources.can_goedkeuren_om'))
+    def goedkeuren_OM(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag goedgekeurd door OM...")
+        
+    @transition(field=status, source='verzonden_OM', target='afgekeurd_OM',
+                permission=lambda instance, user: user.has_perm('resources.can_afkeuren_om'))
+    def afkeuren_OM(self):
+        """
+        This function may contain side-effects,
+        like updating caches, notifying users, etc.
+        :return: value will be discarded.
+        """
+        print("Aanvraag afgekeurd door OM...")
+
+
 
     @property
     def is_editable(self):
-        generator = self.get_available_user_status_transitions(user=self.owner)
+        generator = self.get_available_user_status_transitions(user=self.created_by)
         available_transitions = [(t.name, t.name) for t in generator]
-        if len(available_transitions)>0:
-            return True
-        return False
+        print(f"ID:{self.pk} - transitions: {available_transitions}")
+    
+        if not self.created_by is None:
+            if self.created_by.groups.filter(name__in=INTERCEPTIE_GROUPS).exists():
+                return True
+        return len(available_transitions) > 0
+
 
     

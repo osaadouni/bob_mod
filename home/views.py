@@ -6,27 +6,21 @@ from django.urls import reverse, reverse_lazy
 from django.core.exceptions import PermissionDenied
 
 
-# Define groups
-VERBLISANT_GROUPS       = set(['verbalisant'])
-INTERCEPTIE_DESK_GROUPS = set(['interceptie_desk'])
-
 
 class HomeIndex(LoginRequiredMixin, TemplateView):
     #template_name = 'home.html'
 
     def get(self, request):
+        """
+        Checks the type of user and redirects to the appropriate 
+        page accordingly 
+        """
 
-        if self.is_verbalisant(self.request.user):
+        if self.request.user.is_verbalisant:
             return redirect(reverse('portal:index'))
-        elif self.is_interceptie_desk(request.user):
+        elif self.request.user.is_idesk_member:
             return redirect(reverse('interception:index'))
         else:
             raise PermissionDenied
 
-
-    def is_verbalisant(self, user):
-        return user.groups.filter(name__in=VERBLISANT_GROUPS).exists()
-
-    def is_interceptie_desk(self, user):
-        return user.groups.filter(name__in=INTERCEPTIE_DESK_GROUPS).exists()
 

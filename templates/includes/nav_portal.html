@@ -1,10 +1,13 @@
+{% with app_name|add:":"|add:"index" as home_url %}
+  <a href="{% url home_url %}" class="list-group-item list-group-item-action bg-light">
+    Home <i class="fa fa-home float-right mt-1"></i></a>
+{% endwith %}
 
- {% with app_name|add:":"|add:"index" as home_url %}
-  <a href="{% url home_url %}" class="list-group-item list-group-item-action bg-light">Home</a>
- {% endwith %}
+{% with app_name|add:":"|add:app_name|add:"-list" as list_url %}
+  <a href="{% url list_url %}" class="list-group-item list-group-item-action bg-light">Overzicht aanvragen <i class="fa fa-list float-right mt-1"></i></a>
+{% endwith %}
 
- {% with app_name|add:":"|add:app_name|add:"-create" as create_url %}
-  <a href="{% url create_url %}" class="list-group-item list-group-item-action bg-light">Nieuwe Aanvraag</a>
- {% endwith %}
-
+{% with app_name|add:":"|add:app_name|add:"-create" as create_url %}
+  <a href="{% url create_url %}" class="list-group-item list-group-item-action bg-light">Nieuwe Aanvraag <i class="fa fa-file-o float-right mt-1"></i></a>
+{% endwith %}
 

@@ -8,8 +8,9 @@ from django.views.generic.detail import DetailView
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.contrib.messages.views import SuccessMessageMixin
-from django.contrib.auth.models import User
+from django.conf import settings
 
+from .models import User
 from .forms import SignUpForm, SignInForm
 
 

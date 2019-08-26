@@ -200,7 +200,9 @@ class BOBAanvraagListView(LoginRequiredMixin, FormMixin, SingleTableView, BaseCl
         #qs = super().get_queryset()
         qs = BOBAanvraag.interdesk_manager.verb_aanvragen()
         self.filter = self.filterset_class(self.request.GET, queryset=qs)
+        self.filter.form = self.form_class()
         self.filter.form.helper = self.formhelper_class()
+        #self.filter.form = self.form_class()
         return self.filter.qs
 
     def get(self, request, *args, **kwargs):

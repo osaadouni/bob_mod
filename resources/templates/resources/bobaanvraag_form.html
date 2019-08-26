@@ -16,10 +16,12 @@
         <div class="card mb-3" >
             <div class="card-header">
                 BOB aanvraag formulier
-                <a href="{% url 'portal:portal-list' %}" class="btn btn-primary btn-sm float-right btn-politie" role="button">
+               {% with app_name|add:":"|add:app_name|add:"-list" as list_url %}
+                <a href="{% url list_url %}" class="btn btn-primary btn-sm float-right btn-politie" role="button">
                     <i class="fa fa-list" aria-hidden="true"></i>
                     Werkvoorraad
                 </a>
+                {% endwith %}
 
             </div>
             <div class="card-body" >

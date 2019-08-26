@@ -8,11 +8,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div, Field, Button
 from crispy_forms.bootstrap import FieldWithButtons,StrictButton, AppendedText, PrependedText, PrependedAppendedText
 
-
-
-
-
 from .models import BOBAanvraag
+from .transitions import TRANS_HUMAN 
 
 
 
@@ -59,7 +56,7 @@ class BOBAanvraagForm(forms.ModelForm):
     #)
     class Meta:
         model = BOBAanvraag
-        exclude = ('dvom_bobhandelingid', 'dvom_bobhandeling', 'owner', 'status')
+        exclude = ('dvom_bobhandelingid', 'dvom_bobhandeling', 'created_by', 'updated_by', 'status')
         help_texts = {
             'dvom_datumpv': 'Datum van het PV',
             'dvom_aanvraagpv': 'PV nummer van het aanvraag PV',
@@ -168,21 +165,80 @@ class BOBAanvraagFilterFormHelper(FormHelper):
     form_method = 'GET'
     form_class = 'form-inline'
     field_template = 'bootstrap3/layout/inline_field.html'
+    
+    
+    #layout = Layout(
+    #    'dvom_verbalisant',
+    #    'dvom_verbalisantcontactgegevens',
+    #    'dvom_aanvraagpv',
+    #    'status',
+    #    Submit('submit', 'Zoeken', css_class='btn-politie btn-sm'),
+#
+#    )
     layout = Layout(
-       'dvom_verbalisant',
-        'dvom_verbalisantcontactgegevens',
-        'dvom_aanvraagpv',
-        Submit('submit', 'Zoeken', css_class='btn-politie btn-sm'),
-
+        Row(
+           Column('status', css_class="mr-1"),
+           Column('dvom_aanvraagpv', css_class="mr-1"),
+           Column('dvom_verbalisant', css_class="mr-1"),
+                
+           Column(
+            Submit('submit', 'Zoeken &raquo;', id="id_btn_submit", 
+                css_class="btn-politie btn-submit"
+            ), 
+            css_class='mr-1'
+           ),
+           css_class="row-form d-flex justify-content-start align-items-start pl-3"
+        )
     )
 
     #layout = Layout(
     #    FieldWithButtons('dvom_verbalisant', StrictButton('Go!')),
     #)
 
+class BOBAanvraagFilterForm(forms.ModelForm):
+    
+    states = [(k,v) for k,v in TRANS_HUMAN.items()]
+    choices = [ ('', '-- Selecteer --') ]
+    choices.extend(states)
+    
+    status = forms.ChoiceField(widget=forms.Select(), choices=choices, required=True, initial='')
+    dvom_aanvraagpv = forms.CharField(max_length=50, 
+                            widget=forms.TextInput(attrs={'placeholder': 'Aanvraag PV'}))
+    dvom_verbalisant = forms.CharField(max_length=100, 
+                            widget=forms.TextInput(attrs={'placeholder': 'Naam verbalisant'}))
+    class Meta:
+        model = BOBAanvraag
+        fields = ('status', 'dvom_aanvraagpv', 'dvom_verbalisant')
+        
+
+    def __init__(self, *args, **kwargs):
+
+
+        super().__init__(*args, **kwargs)
+
+
+        self.helper = FormHelper()
+        self.helper.form_class = 'inline-form'
+        self.helper.form_action = "."
+        self.helper.form_method = 'GET'
+        self.helper.form_id = 'aanvraagFilterFormId'
+        self.helper.attrs = {'novalidate': 'true'}
+        self.helper.form_show_labels = False 
+        self.helper.layout = Layout(
+            Row(
+               Column('status', css_class="col-sm-2"),
+               Column('dvom_aanvraagpv', css_class="col-sm-2"),
+               Column('dvom_verbalisant', css_class="col-sm-2"),
+                    
+               Column(Submit('btn_submit_id', 'Verzenden &raquo;', id="id_btn_submit",
+               css_class='btn-politie  btn-submit ')),
+               css_class="row-form d-flex justify-content-start align-items-start"
+            )
+        )
+
 
 class BOBAanvraagStatusForm(forms.Form):
-    next_status = forms.ChoiceField(label="Ik wil deze aanvraag: ", widget=forms.Select(), choices=[], required=True)
+    next_status = forms.ChoiceField(label="Update status naar: ", widget=forms.Select(), choices=[], required=True)
     class Meta:
         fields = ('next_status',)
 

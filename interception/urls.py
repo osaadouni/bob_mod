@@ -9,6 +9,7 @@ urlpatterns = [
 
     # interception handeling
     path('', views.InterceptionIndexView.as_view(), name='index'),
+    path('list/', views.BOBAanvraagListView.as_view(), name='interception-list'),
     path('add/', views.BOBAanvraagCreateView.as_view(), name='interception-create'),
     path('detail/<int:pk>', views.BOBAanvraagDetailView.as_view(), name='interception-detail'),
     path('edit/<int:pk>', views.BOBAanvraagUpdateView.as_view(), name='interception-edit'),

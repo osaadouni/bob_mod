@@ -63,7 +63,7 @@ class BOBAanvraagCreateView(LoginRequiredMixin, BaseClassView, CreateView):
     def form_valid(self, form):
         print('form_valid()')
         self.object = form.save(commit=False)
-        self.object.owner = self.request.user
+        self.object.created_by = self.request.user
         self.object.save()
         return redirect(self.get_success_url())
 
@@ -155,7 +155,9 @@ class BOBAanvraagUpdateView(LoginRequiredMixin, BaseClassView, UpdateView):
     def form_valid(self, form):
         print('UpdateView::form_valid()')
         self.object = form.save(commit=False)
-        self.object.owner = self.request.user
+        self.object.updated_by = self.request.user
+        if self.object.created_by is None:
+            self.object.created_by = self.request.user
         self.object.save()
         messages.success(self.request, 'Aanvraag is successvol geupdate.')
         return redirect(self.get_success_url())
@@ -174,18 +176,19 @@ class BOBAanvraagDeleteView(LoginRequiredMixin, BaseClassView, DeleteView):
 
 class BOBAanvraagListView(LoginRequiredMixin, SingleTableView, BaseClassView, FilterView):
     model = BOBAanvraag
-    template_name = 'portal/bobaanvraag_list.html'
+    template_name = None
     table_class = BOBAanvraagTable
     context_filter_name = 'filter'
 
-    #ordering = ['-pk']
-    paginate_by = 5
+    ordering = ['-pk']
+    paginate_by = 25
 
     filterset_class = BOBAanvraagFilter
     formhelper_class = BOBAanvraagFilterFormHelper
 
     def get_queryset(self, **kwargs):
-        qs = super().get_queryset()
+        #qs = super().verb_aanvragen(self.request.user)
+        qs = BOBAanvraag.verb_manager.verb_aanvragen(self.request.user)
         self.filter = self.filterset_class(self.request.GET, queryset=qs)
         self.filter.form.helper = self.formhelper_class()
         return self.filter.qs
@@ -198,4 +201,6 @@ class BOBAanvraagListView(LoginRequiredMixin, SingleTableView, BaseClassView, Fi
         context[self.context_filter_name] = self.filter
         return context
 
+    def get_template_names(self):
+        return  f'{self.app_name}/bobaanvraag_list.html'
 

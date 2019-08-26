@@ -1,3 +1,5 @@
 {% if record.is_editable %}
-<a class="btn btn-danger btn-sm text-nowrap"  href="{% url 'portal:portal-delete' record.id %}"> Delete <i class="fa fa-trash-o"></i> </a>
+  {% with app_name|add:":"|add:app_name|add:"-delete" as delete_url %}
+    <a class="btn btn-danger btn-sm text-nowrap"  href="{% url delete_url record.id %}"> Delete <i class="fa fa-trash-o"></i> </a>
+  {% endwith %}
 {% endif %}
