@@ -76,3 +76,5 @@ db.sqlite3
 
 media/documents
 __pycache__/
+
+*.pyc
