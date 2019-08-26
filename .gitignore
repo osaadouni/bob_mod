@@ -75,3 +75,4 @@ fabric.properties
 db.sqlite3
 
 media/documents
+__pycache__
