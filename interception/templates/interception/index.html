@@ -18,36 +18,49 @@
     <div class="card border">
     <div class="card-body">
 
+        {% with app_name|add:":"|add:app_name|add:"-list" as var_url %}
+        
         <div class="row">
             <div class="col-sm-3">
+                <a href="{% url var_url %}?status=ingediend">
                 <div class="card mb-3 border border-primary">
                     <div class="card-body">
                     Ingediende aanvragen
                     </div>
                 </div>
+                </a>
             </div>
             <div class="col-sm-3">
-                <div class="card mb-3 border border-secondary">
+                <a href="{% url var_url %}?status=goedgekeurd">
+                <div class="card mb-3 border border-primary">
                     <div class="card-body">
                     Goedgekeurde aanvragen
                     </div>
                 </div>
+                </a>
             </div>
             <div class="col-sm-3">
+                <a href="{% url var_url %}?status=afgekeurd">
                 <div class="card mb-3 border border-info">
                     <div class="card-body">
                     Afgekeurde aanvragen 
                     </div>
                 </div>
+                </a>
             </div>
             <div class="col-sm-3">
+                <a href="{% url var_url %}?status=verzonden_om">
                 <div class="card mb-3 border border-danger">
                     <div class="card-body">
                     Aanvragen bij OM
                     </div>
                 </div>
+                </a>
             </div>
         </div>
+        
+        {% endwith %}
+        
     </div>
     </div>
 

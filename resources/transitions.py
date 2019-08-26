@@ -37,6 +37,7 @@ STATE_HUMAN = {
 }
 
 STATE_CSS = {
+    'aangemaakt': 'badge-dark',
     'ingediend': 'badge-primary',
     'inbehandeling': 'badge-secondary',
     'in_de_wacht': 'badge-dark',

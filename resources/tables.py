@@ -14,6 +14,9 @@ class BOBAanvraagTable(tables.Table):
 
 
         attrs = {
+            'thead': { 
+                'class': 'thead-dark' 
+            } ,
             'th': {
                 '_ordering': {
                     'orderable': 'sortable',
