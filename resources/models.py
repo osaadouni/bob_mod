@@ -14,6 +14,11 @@ VERLENING_PERIODES = (
     ('MM', 'Maand/Maanden'),
 )
 
+VERSTREKKING_GEGEVENS_TARGETS = (
+    ('verba', 'Verbalisant'),
+    ('ander', 'Anders'),
+)
+
 
 
 
@@ -25,55 +30,42 @@ def user_directory_path(instance, filename):
 
 class BOBAanvraag(models.Model):
 
+    naam_ovj = models.CharField(max_length=100, null=True, blank=null)
+    parket_nummer =  models.CharField(max_length=100, null=True, blank=null)
+    naam_onderzoek = models.CharField(max_length=200, null=True, blank=True)
+    rc_nummer = models.CharField(max_length=100, null=True, blank=True)
+    mondeling_aanvraag_bevestiging = models.BooleanField(choices=BOOL_CHOICES,
+                                             verbose_name='Mondelinge aanvraag',
+                                             help_text='Betreft het een bevestiging mondelinge aanvraag',
+                                             default=False)
+    mondeling_aanvraag_datum = models.DateField(blank=True, null=True)
+
+
     # pv fields
-    dvom_aanvraagpv = models.CharField('Aanvraag PV', max_length=50)
-    dvom_datumpv = models.DateField()
+    pv_nummer = models.CharField('PV nummer', max_length=50)
+
+    onderzoeksbelang_toelichting = models.TextField('Toelichting op het onderzoeksbelang:', null=True, blank=True)
 
     # verbalisant fields
-    dvom_verbalisant  = models.CharField('Naam verbalisant', max_length=100, help_text='Naam van de verbalisant')
-    dvom_verbalisantcontactgegevens = models.EmailField(verbose_name='E-mail verbalisant',
-                                                        help_text='Contactgegevens van de verbalisant')
-
-    # bevoegdheid field
-    dvom_strafvorderlijkebevoegdheidid = models.CharField('Bevoegdheid', max_length=100, default='', help_text="""ID van de 
-                                                          bevoegdheid """)
-
-    # verlenging
-    dvom_verlenging = models.BooleanField(choices=BOOL_CHOICES, verbose_name='Verlenging', default=False)
-    dvom_verlengingingaandop = models.DateField(null=True, blank=True)
-    dvom_verlengingeinddatum = models.DateField(null=True, blank=True)
-    dvom_verlenging_aantal = models.PositiveIntegerField('Periode verlenging (aantal)', default=0,
-                                                         blank=True, null=True,
-                                validators=[MinValueValidator(0), MaxValueValidator(100)],
-                                help_text="""Voor hoe lang wordt de verlenging van de handeling gevraagd 
-                                             (aantal i.c.m.volgend veld)""")
-
-    dvom_verlenging_periode = models.CharField('Periode verlenging (eenheid)', max_length=2,
-                                               choices=VERLENING_PERIODES,
+    verstrekking_gegevens_aan = models.CharField('Aan wie gegevens verstrekken:', max_length=5,
+                                               choices=VERSTREKKING_GEGEVENS_TARGETS,
                                                blank=True, null=True,
                                                help_text="""Eenheid van de periode waarvoor 
                                                             de verlenging van de handeling gevraagd wordt""")
+    verbalisant  = models.CharField('Naam verbalisant', max_length=100, help_text='Naam van de verbalisant')
+    verbalisant_email = models.EmailField(verbose_name='E-mail verbalisant',
+                                          help_text='Contactgegevens van de verbalisant')
 
-
-    # Vordering tot machtiging
-    dvom_vtmstartdatum = models.DateField(verbose_name='VTMStartdatum / Op', null=True, blank=True)
-    dvom_vtmeinddatum = models.DateField(verbose_name='VTMEinddatum', null=True, blank=True)
-
-    dvom_periode_aantal = models.PositiveIntegerField('Aantal (periode)', default=0, null=True, blank=True,
-                                                         validators=[MinValueValidator(0), MaxValueValidator(100)],
-                                                         help_text="""Periode vordering tot machtiging  
-                                                                      (aantal i.c.m.volgend veld)""")
-
-    dvom_periode_periode = models.CharField('Periode (eenheid)', max_length=2, choices=VERLENING_PERIODES,
-                                            null=True, blank=True,
-                                            help_text="""Eenheid van de periode tot vordering tot machtiging""")
-
-    pdf_document = models.FileField('PDF Document', upload_to='documents/%Y/%m/%d', blank=True, null=True)
+    bijlage_toevoegen = models.BooleanField(choices=BOOL_CHOICES,
+                                   verbose_name='Bijlagen',
+                                   help_text='',
+                                   default=False)
+    bijlage = models.FileField('Bijlage', upload_to='documents/%Y/%m/%d', blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    owner = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='bob_aanvragen', null=True,blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='bob_aanvragen', null=True,blank=True)
 
     status = FSMField(default='aangemaakt')
 

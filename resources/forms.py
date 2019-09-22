@@ -8,13 +8,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div, Field, Button
 from crispy_forms.bootstrap import FieldWithButtons,StrictButton, AppendedText, PrependedText, PrependedAppendedText
 
-
-
-
-
 from .models import BOBAanvraag
-
-
 
 
 class BOBAanvraagForm(forms.ModelForm):
@@ -25,7 +19,6 @@ class BOBAanvraagForm(forms.ModelForm):
         help_text='Datum van het PV',
         input_formats=settings.DATE_INPUT_FORMATS
     )
-
     dvom_verlengingingaandop = forms.DateField(
         label='Verlenging ingaand op',
         widget=DatePickerInput(format='%d/%m/%Y'),
@@ -51,12 +44,6 @@ class BOBAanvraagForm(forms.ModelForm):
         input_formats=settings.DATE_INPUT_FORMATS
     )
 
-
-    #dvom_heterdaad = forms.TypedChoiceField(
-    #    coerce=lambda x: x == 'True',
-    #    choices=((False, 'False'), (True, 'True')),
-    #    widget=forms.RadioSelect
-    #)
     class Meta:
         model = BOBAanvraag
         exclude = ('dvom_bobhandelingid', 'dvom_bobhandeling', 'owner', 'status')
