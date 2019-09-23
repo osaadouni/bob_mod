@@ -5,4 +5,4 @@ from .models import BOBAanvraag
 class BOBAanvraagFilter(django_filters.FilterSet):
     class Meta:
         model = BOBAanvraag
-        fields = ['dvom_verbalisant', 'dvom_verbalisantcontactgegevens', 'dvom_aanvraagpv']
+        fields = ['verbalisant', 'verbalisant_email', 'pv_nummer']

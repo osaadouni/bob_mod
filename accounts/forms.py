@@ -1,10 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.models import User
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column
 from crispy_forms.bootstrap import PrependedText, PrependedAppendedText, AppendedText
+
+from .models import CustomUser
+
 
 class SignUpForm(UserCreationForm):
     username = forms.CharField(
@@ -24,7 +26,7 @@ class SignUpForm(UserCreationForm):
     )
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ('username', 'email', 'password1', 'password2')
 
 
@@ -41,7 +43,7 @@ class SignInForm(AuthenticationForm):
         widget=forms.PasswordInput
     )
     class Meta:
-        model = User
+        model = CustomUser
         fields = ('username', 'password1')
 
     def __init__(self, *args, **kwargs):

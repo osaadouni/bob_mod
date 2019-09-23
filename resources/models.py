@@ -1,9 +1,9 @@
+import uuid
 from django.db import models
-from django.contrib.auth.models import User
 from django.urls import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django_fsm import FSMField, transition, has_transition_perm, get_all_FIELD_transitions, get_available_FIELD_transitions, get_available_user_FIELD_transitions
-
+from django.conf import  settings
 
 
 BOOL_CHOICES = ((True, 'Ja'), (False, 'Nee'))
@@ -16,7 +16,7 @@ VERLENING_PERIODES = (
 
 VERSTREKKING_GEGEVENS_TARGETS = (
     ('verba', 'Verbalisant'),
-    ('ander', 'Anders'),
+    ('ander', 'Andere'),
 )
 
 
@@ -30,8 +30,11 @@ def user_directory_path(instance, filename):
 
 class BOBAanvraag(models.Model):
 
-    naam_ovj = models.CharField(max_length=100, null=True, blank=null)
-    parket_nummer =  models.CharField(max_length=100, null=True, blank=null)
+    unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True) # unique id`
+    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False) # as primary key
+
+    naam_ovj = models.CharField(max_length=100, null=True, blank=True)
+    parket_nummer =  models.CharField(max_length=100, null=True, blank=True)
     naam_onderzoek = models.CharField(max_length=200, null=True, blank=True)
     rc_nummer = models.CharField(max_length=100, null=True, blank=True)
     mondeling_aanvraag_bevestiging = models.BooleanField(choices=BOOL_CHOICES,
@@ -50,8 +53,7 @@ class BOBAanvraag(models.Model):
     verstrekking_gegevens_aan = models.CharField('Aan wie gegevens verstrekken:', max_length=5,
                                                choices=VERSTREKKING_GEGEVENS_TARGETS,
                                                blank=True, null=True,
-                                               help_text="""Eenheid van de periode waarvoor 
-                                                            de verlenging van de handeling gevraagd wordt""")
+                                               help_text="")
     verbalisant  = models.CharField('Naam verbalisant', max_length=100, help_text='Naam van de verbalisant')
     verbalisant_email = models.EmailField(verbose_name='E-mail verbalisant',
                                           help_text='Contactgegevens van de verbalisant')
@@ -62,12 +64,14 @@ class BOBAanvraag(models.Model):
                                    default=False)
     bijlage = models.FileField('Bijlage', upload_to='documents/%Y/%m/%d', blank=True, null=True)
 
+    status = FSMField(default='aangemaakt')
+
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                   related_name='created_bob_aanvragen', null=True,blank=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                   related_name='updated_bob_aanvragen', null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='bob_aanvragen', null=True,blank=True)
-
-    status = FSMField(default='aangemaakt')
 
     def __str__(self):
         return f"#{self.id}) - PV: {self.dvom_aanvraagpv}"

@@ -12,64 +12,36 @@ from .models import BOBAanvraag
 
 
 class BOBAanvraagForm(forms.ModelForm):
-    dvom_datumpv = forms.DateField(
-        label='Datum PV',
+    mondeling_aanvraag_datum = forms.DateField(
+        label='Datum aanvraag',
         widget=DatePickerInput(format='%d/%m/%Y'),
         initial=datetime.date.today(),
-        help_text='Datum van het PV',
-        input_formats=settings.DATE_INPUT_FORMATS
-    )
-    dvom_verlengingingaandop = forms.DateField(
-        label='Verlenging ingaand op',
-        widget=DatePickerInput(format='%d/%m/%Y'),
-        input_formats=settings.DATE_INPUT_FORMATS,
-        required=False,
-    )
-    dvom_verlengingeinddatum = forms.DateField(
-        label='Verlenging einddatum',
-        widget=DatePickerInput(format='%d/%m/%Y'),
-        input_formats=settings.DATE_INPUT_FORMATS,
-        required=False,
-    )
-    dvom_vtmstartdatum = forms.DateField(
-        label='VTM Startdatum / op',
-        widget=DatePickerInput(format='%d/%m/%Y'),
-        help_text='Startdatum vordering tot machtiging',
-        input_formats=settings.DATE_INPUT_FORMATS
-    )
-    dvom_vtmeinddatum = forms.DateField(
-        label='VTM Einddatum',
-        widget=DatePickerInput(format='%d/%m/%Y'),
-        help_text='Einddatum vordering tot machtiging',
+        help_text='Datum v/d mondelinge vordering',
         input_formats=settings.DATE_INPUT_FORMATS
     )
 
     class Meta:
         model = BOBAanvraag
-        exclude = ('dvom_bobhandelingid', 'dvom_bobhandeling', 'owner', 'status')
+        exclude = ('unique_id', 'created_by', 'updated_by', 'status', 'created_at', 'updated_at')
         help_texts = {
-            'dvom_datumpv': 'Datum van het PV',
             'dvom_aanvraagpv': 'PV nummer van het aanvraag PV',
-            'dvom_verlenging': 'Betreft het een verlenging van een eerdere portal handeling',
+            'mondeling_aanvraag_bevestiging': 'Betreft het een bevestiging van een mondelinge aanvraag',
         }
         widgets = {
-            'dvom_verlenging': forms.RadioSelect,
+            'mondeling_aanvraag_bevestiging': forms.RadioSelect,
+            'bijlage_toevoegen': forms.RadioSelect,
         }
 
         error_messages = {
-            "dvom_aanvraagpv": {
+            "pv_nummer": {
                 "required": _("Dit veld is verplicht.")
             },
-            "dvom_verbalisant": {
+            "verbalisant": {
                 "required": _("Dit veld is verplicht.")
             },
-            "dvom_verbalisantcontactgegevens": {
+            "verbalisant_email": {
                 "required": _("Dit veld is verplicht.")
             },
-            "dvom_strafvorderlijkebevoegdheidid": {
-                "required": _("Dit veld is verplicht.")
-            },
-
         }
 
     def __init__(self, *args, **kwargs):
@@ -83,56 +55,40 @@ class BOBAanvraagForm(forms.ModelForm):
             Fieldset(
                 'Algemeen',
                 Row(
-                    Div('dvom_aanvraagpv', css_class='col-md-6 mb-0 bob-data-required'),
-                    Div('dvom_datumpv', css_class='col-md-6 mb-0 bob-data-required'),
+                    Div('naam_ovj', css_class='col-md-6 mb-0 bob-data-required'),
+                    Div('parket_nummer', css_class='col-md-6 mb-0 bob-data-required'),
                     css_class='form-row'
                 ),
                 Row(
-                    Column('dvom_verbalisant', css_class='form-group col-md-6 mb-0'),
-                    Column('dvom_verbalisantcontactgegevens', css_class='form-group col-md-6 mb-0'),
+                    Div('naam_onderzoek', css_class='col-md-6 mb-0 bob-data-required'),
+                    Div('rc_nummer', css_class='col-md-6 mb-0 bob-data-required'),
                     css_class='form-row'
                 ),
                 Row(
-                    Column('dvom_strafvorderlijkebevoegdheidid', css_class='form-group col-md-6 mb-0'),
+                    Column('mondeling_aanvraag_bevestiging', css_class='form-group col-md-6 mb-0'),
+                    Column('mondeling_aanvraag_datum', css_class='form-group col-md-6 mb-0'),
                     css_class='form-row'
                 ),
                 Row(
-                    Column('dvom_verlenging', css_class='form-group col-md-6 mb-0'),
+                    Column('pv_nummer', css_class='form-group col-md-6 mb-0'),
+                    Column('onderzoeksbelang_toelichting', css_class='form-group col-md-6 mb-0'),
                     css_class='form-row'
                 ),
                 Row(
-                    Column('dvom_verlengingingaandop', css_class='form-group col-md-6 mb-0'),
-                    Column('dvom_verlengingeinddatum', css_class='form-group col-md-6 mb-0'),
+                    Column('verstrekking_gegevens_aan', css_class='form-group col-md-6 mb-0'),
                     css_class='form-row'
                 ),
                 Row(
-                    Column('dvom_verlenging_aantal', css_class='form-group col-md-6 mb-0'),
-                    Column('dvom_verlenging_periode', css_class='form-group col-md-6 mb-0'),
+                    Column('verbalisant', css_class='form-group col-md-6 mb-0'),
+                    Column('verbalisant_email', css_class='form-group col-md-6 mb-0'),
+                    css_class='form-row'
+                ),
+                Row(
+                    Column('bijlage_toevoegen', css_class='form-group col-md-6 mb-0'),
+                    Column('bijlage', css_class='form-group col-md-6 mb-0'),
                     css_class='form-row'
                 ),
             ),
-            Fieldset(
-                'Machtiging tot vordering',
-                Row(
-                    Column('dvom_vtmstartdatum', css_class='form-group col-md-6 mb-0'),
-                    Column('dvom_vtmeinddatum', css_class='form-group col-md-6 mb-0'),
-                    css_class='form-row'
-                ),
-                Row(
-                    Column('dvom_periode_aantal', css_class='form-group col-md-6 mb-0'),
-                    Column('dvom_periode_periode', css_class='form-group col-md-6 mb-0'),
-                    css_class='form-row'
-                ),
-            ),
-
-            Fieldset(
-                'PDF Upload',
-                Row(
-                    Column('pdf_document', css_class='form-group col-md-6 mb-0'),
-                    css_class='form-row'
-                ),
-            ),
-
             Submit('btn_submit_id', 'Opslaan &raquo;', id="id_btn_submit", css_class='btn-politie float-right btn-submit')
         )
 
@@ -141,11 +97,6 @@ class BOBAanvraagForm(forms.ModelForm):
         print('BOBAanvraagForm::clean()')
 
         cleaned_data = super().clean()
-        dvom_aanvraagpv = cleaned_data.get('dvom_aanvraagpv')
-        dvom_datumpv = cleaned_data.get('dvom_datumpv')
-        dvom_bobhandeling = f"BOB_handeling_{dvom_aanvraagpv}_{dvom_datumpv}"
-        cleaned_data['dvom_bobhandeling'] = dvom_bobhandeling
-        print(f"dvom_bobhandeling: {dvom_bobhandeling}")
 
         return cleaned_data
 
@@ -156,9 +107,9 @@ class BOBAanvraagFilterFormHelper(FormHelper):
     form_class = 'form-inline'
     field_template = 'bootstrap3/layout/inline_field.html'
     layout = Layout(
-       'dvom_verbalisant',
-        'dvom_verbalisantcontactgegevens',
-        'dvom_aanvraagpv',
+       'verbalisant',
+        'verbalisant_email',
+        'pv_nummer',
         Submit('submit', 'Zoeken', css_class='btn-politie btn-sm'),
 
     )

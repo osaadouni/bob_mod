@@ -127,10 +127,12 @@ WSGI_APPLICATION = 'bob_project.wsgi.application'
 
 DATABASES = {
     # read os.environ['DATABASE_URL'] and raises ImproperlyConfigured exception if not found
-    'default': env.db(),
+    #'default': env.db(),
     # read os.environ['SQLITE_URL']
-    'extra': env.db('SQLITE_URL', default='sqlite:///db.sqlite3')
+    #'extra': env.db('SQLITE_URL', default='sqlite:///db.sqlite3')
+    'default': env.db('SQLITE_URL', default='sqlite:///db.sqlite3')
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -164,6 +166,10 @@ USE_L10N = True
 
 USE_TZ = True
 
+
+
+# Custom User Settings
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 
 # Static files (CSS, JavaScript, Images)
