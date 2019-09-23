@@ -38,8 +38,8 @@ class BOBAanvraagCreateView(LoginRequiredMixin,CreateView):
         initial = super().get_initial()
         # Copy the dictionary so we don't accidently change a mutable dict
         initial = initial.copy()
-        initial['dvom_verbalisant'] = self.request.user.get_full_name()
-        initial['dvom_verbalisantcontactgegevens'] = self.request.user.email
+        initial['verbalisant'] = self.request.user.get_full_name()
+        initial['verbalisant_email'] = self.request.user.email
         return initial
 
     def get_form(self, form_class=None):
@@ -62,9 +62,31 @@ class BOBAanvraagCreateView(LoginRequiredMixin,CreateView):
     def get_success_url(self):
         return reverse_lazy('portal:portal-detail', args=[str(self.object.pk)])
 
+class BOBAanvraagFormsView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        view = BOBAanvraagFormsListView.as_view()
+        return view(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        print("BOBAanvraagFormsview::post()...")
+        pass
+
+
+class BOBAanvraagFormsListView(LoginRequiredMixin, View):
+    model = BOBAanvraag
+    template_name = 'portal/bobaanvraag_forms_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.object = self.get_object()
+        form = BOBAanvraagStatusForm(available_transitions=available_transitions)
+        form.helper.form_action = reverse('portal:portal-detail', args=[str(self.object.pk)])
+        context['form'] = form
+        return context
+
+
 
 class BOBAanvraagDetailView(LoginRequiredMixin, View):
-
     def get(self, request, *args, **kwargs):
         view = BOBAanvraagDetailDisplayView.as_view()
         return view(request, *args, **kwargs)

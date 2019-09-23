@@ -33,12 +33,12 @@ class BOBAanvraag(models.Model):
     unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True) # unique id`
     #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False) # as primary key
 
-    naam_ovj = models.CharField(max_length=100, null=True, blank=True)
+    naam_ovj = models.CharField('Naam Officier van Justitie', max_length=100, null=True, blank=True)
     parket_nummer =  models.CharField(max_length=100, null=True, blank=True)
     naam_onderzoek = models.CharField(max_length=200, null=True, blank=True)
     rc_nummer = models.CharField(max_length=100, null=True, blank=True)
     mondeling_aanvraag_bevestiging = models.BooleanField(choices=BOOL_CHOICES,
-                                             verbose_name='Mondelinge aanvraag',
+                                             verbose_name='Bevestiging mondelinge aanvraag?',
                                              help_text='Betreft het een bevestiging mondelinge aanvraag',
                                              default=False)
     mondeling_aanvraag_datum = models.DateField(blank=True, null=True)
@@ -74,7 +74,7 @@ class BOBAanvraag(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"#{self.id}) - PV: {self.dvom_aanvraagpv}"
+        return f"#{self.id}) - PV: {self.pv_nummer}"
 
     def get_absolute_url(self):
         return reverse('bobaanvraag-detail', args=[str(self.id)])

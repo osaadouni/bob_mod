@@ -70,12 +70,12 @@ class BOBAanvraagForm(forms.ModelForm):
                     css_class='form-row'
                 ),
                 Row(
-                    Column('pv_nummer', css_class='form-group col-md-6 mb-0'),
-                    Column('onderzoeksbelang_toelichting', css_class='form-group col-md-6 mb-0'),
+                    Column('pv_nummer', css_class='form-group col-sm-3 mb-0'),
+                    Column('onderzoeksbelang_toelichting', css_class='form-group col-md-6 offset-md-3 mb-0'),
                     css_class='form-row'
                 ),
                 Row(
-                    Column('verstrekking_gegevens_aan', css_class='form-group col-md-6 mb-0'),
+                    Column('verstrekking_gegevens_aan', css_class='form-group col-md-3 mb-0'),
                     css_class='form-row'
                 ),
                 Row(

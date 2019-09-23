@@ -2,7 +2,7 @@
   $.fn.mdbRate = function () {
     var $stars;
     // Custom whitelist to allow for using HTML tags in popover content
-    var myDefaultWhiteList = $.fn.tooltip.Constructor.Default.whiteList
+    var myDefaultWhiteList = $.fn.tooltip.Constructor.Default.whiteList;
     myDefaultWhiteList.textarea = [];
     myDefaultWhiteList.button = [];
 
