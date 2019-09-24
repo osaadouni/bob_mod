@@ -7,6 +7,7 @@ from bootstrap_datepicker_plus import DatePickerInput
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div, Field, Button
 from crispy_forms.bootstrap import FieldWithButtons,StrictButton, AppendedText, PrependedText, PrependedAppendedText
+from crispy_forms.bootstrap import InlineRadios
 
 from .models import BOBAanvraag
 
@@ -55,6 +56,12 @@ class BOBAanvraagForm(forms.ModelForm):
             Fieldset(
                 'Algemeen',
                 Row(
+                    #Column('mondeling_aanvraag_bevestiging', css_class='bobaanvraag-mondeling-check col-md-6 mb-0'),
+                    Div(InlineRadios('mondeling_aanvraag_bevestiging'), css_class='bobaanvraag-mondeling-check col-md-6 mb-0'),
+                    Column('mondeling_aanvraag_datum', css_class='bobaanvraag-mondeling-datum col-md-6 mb-0'),
+                    css_class='form-row'
+                ),
+                Row(
                     Div('naam_ovj', css_class='col-md-6 mb-0 bob-data-required'),
                     Div('parket_nummer', css_class='col-md-6 mb-0 bob-data-required'),
                     css_class='form-row'
@@ -62,11 +69,6 @@ class BOBAanvraagForm(forms.ModelForm):
                 Row(
                     Div('naam_onderzoek', css_class='col-md-6 mb-0 bob-data-required'),
                     Div('rc_nummer', css_class='col-md-6 mb-0 bob-data-required'),
-                    css_class='form-row'
-                ),
-                Row(
-                    Column('mondeling_aanvraag_bevestiging', css_class='form-group col-md-6 mb-0'),
-                    Column('mondeling_aanvraag_datum', css_class='form-group col-md-6 mb-0'),
                     css_class='form-row'
                 ),
                 Row(
