@@ -14,7 +14,7 @@ from .models import BOBAanvraag
 
 class BOBAanvraagForm(forms.ModelForm):
     mondeling_aanvraag_datum = forms.DateField(
-        label='Datum aanvraag',
+        label='Datum mondelinge aanvraag',
         widget=DatePickerInput(format='%d/%m/%Y'),
         initial=datetime.date.today(),
         help_text='Datum v/d mondelinge vordering',
@@ -61,6 +61,7 @@ class BOBAanvraagForm(forms.ModelForm):
                     Column('mondeling_aanvraag_datum', css_class='bobaanvraag-mondeling-datum col-md-6 mb-0'),
                     css_class='form-row'
                 ),
+                Field('naam_ovj', id="id_naam_ovj", css_class='bob-data-required', wrapper_class="col-sm-4 pl-0"),
                 Row(
                     Div('naam_ovj', css_class='col-md-6 mb-0 bob-data-required'),
                     Div('parket_nummer', css_class='col-md-6 mb-0 bob-data-required'),
