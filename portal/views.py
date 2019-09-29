@@ -50,7 +50,7 @@ class BOBAanvraagCreateView(LoginRequiredMixin,CreateView):
     def form_valid(self, form):
         print('form_valid()')
         self.object = form.save(commit=False)
-        self.object.owner = self.request.user
+        self.object.created_by = self.request.user
         self.object.save()
         return redirect(self.get_success_url())
 
@@ -160,10 +160,15 @@ class BOBAanvraagUpdateView(UpdateView):
         form.helper.form_action = reverse('portal:portal-edit', kwargs={'pk': self.object.pk})
         return form
 
+    def post(self, request, *args, **kwargs):
+        print("UpdateView::get_form()")
+        self.object = self.get_object()
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
         print('UpdateView::form_valid()')
         self.object = form.save(commit=False)
-        self.object.owner = self.request.user
+        self.object.updated_by = self.request.user
         self.object.save()
         messages.success(self.request, 'Aanvraag is successvol geupdate.')
         return redirect(self.get_success_url())

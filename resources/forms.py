@@ -31,6 +31,7 @@ class BOBAanvraagForm(forms.ModelForm):
         widgets = {
             'mondeling_aanvraag_bevestiging': forms.RadioSelect,
             'bijlage_toevoegen': forms.RadioSelect,
+            'onderzoeksbelang_toelichting': forms.Textarea(attrs={'rows':3})
         }
 
         error_messages = {
@@ -58,37 +59,33 @@ class BOBAanvraagForm(forms.ModelForm):
                 Row(
                     #Column('mondeling_aanvraag_bevestiging', css_class='bobaanvraag-mondeling-check col-md-6 mb-0'),
                     Div(InlineRadios('mondeling_aanvraag_bevestiging'), css_class='bobaanvraag-mondeling-check col-md-6 mb-0'),
-                    Column('mondeling_aanvraag_datum', css_class='bobaanvraag-mondeling-datum col-md-6 mb-0'),
+                    Field('mondeling_aanvraag_datum', css_class='bobaanvraag-mondeling-datum',
+                          wrapper_class='col-md-6 mb-0'),
                     css_class='form-row'
                 ),
                 Field('naam_ovj', id="id_naam_ovj", css_class='bob-data-required', wrapper_class="col-sm-4 pl-0"),
                 Row(
-                    Div('naam_ovj', css_class='col-md-6 mb-0 bob-data-required'),
-                    Div('parket_nummer', css_class='col-md-6 mb-0 bob-data-required'),
+                    Field('parket_nummer', css_class='bob-data-required', wrapper_class='col-md-6 mb-0'),
+                    Field('rc_nummer', css_class='bob-data-required', wrapper_class='col-md-6 mb-0'),
                     css_class='form-row'
                 ),
                 Row(
-                    Div('naam_onderzoek', css_class='col-md-6 mb-0 bob-data-required'),
-                    Div('rc_nummer', css_class='col-md-6 mb-0 bob-data-required'),
+                    Field('naam_onderzoek', wrapper_class='col-md-6 mb-0', css_class='bob-data-required'),
+                    Field('onderzoeksbelang_toelichting', wrapper_class='col-md-6 mb-0'),
                     css_class='form-row'
                 ),
                 Row(
-                    Column('pv_nummer', css_class='form-group col-sm-3 mb-0'),
-                    Column('onderzoeksbelang_toelichting', css_class='form-group col-md-6 offset-md-3 mb-0'),
+                    Field('verstrekking_gegevens_aan', wrapper_class='col-md-3 mb-0'),
                     css_class='form-row'
                 ),
                 Row(
-                    Column('verstrekking_gegevens_aan', css_class='form-group col-md-3 mb-0'),
+                    Field('verbalisant', wrapper_class='col-md-6 mb-0'),
+                    Field('verbalisant_email', wrapper_class='col-md-6 mb-0'),
                     css_class='form-row'
                 ),
                 Row(
-                    Column('verbalisant', css_class='form-group col-md-6 mb-0'),
-                    Column('verbalisant_email', css_class='form-group col-md-6 mb-0'),
-                    css_class='form-row'
-                ),
-                Row(
-                    Column('bijlage_toevoegen', css_class='form-group col-md-6 mb-0'),
-                    Column('bijlage', css_class='form-group col-md-6 mb-0'),
+                    Field('bijlage_toevoegen', wrapper_class='col-md-6 mb-0'),
+                    Field('bijlage', wrapper_class='col-md-6 mb-0'),
                     css_class='form-row'
                 ),
             ),

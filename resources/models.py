@@ -20,19 +20,74 @@ VERSTREKKING_GEGEVENS_TARGETS = (
 )
 
 
-
-
 def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
     #return 'user_{0}/{1}'.format(instance.user.id, filename)
     return 'user_{0}/{1}'.format(instance.user.username, filename)
 
 
+##################################
+# Model: Persoon
+##################################
+class Persoon(models.Model):
+    voornaam = models.CharField('Voornaam', max_length=100)
+    achternaam = models.CharField('Achternaam', max_length=100)
+    email = models.EmailField()
+    mobiel = models.CharField('Mobiel', max_length=20)
+
+
+##################################
+# Model: NatuurlijkPersoon
+##################################
+class NatuurlijkPersoon(Persoon):
+    pass
+
+
+##################################
+# Model: RechtsPersoon
+##################################
+class RechtsPersoon(Persoon):
+    pass
+
+
+
+
+##################################
+# Model: Verbalisant
+##################################
+class Verbalisant(models.Model):
+    naam = models.CharField('Naam', max_length=100)
+    email = models.EmailField()
+    rang = models.CharField('Rang', max_length=100)
+
+    def __str__(self):
+        return f"{self.naam} (#{self.pk})"
+
+
+##################################
+# Model: PvVerdenking
+##################################
+class PvVerdenking(models.Model):
+    pv_nummer = models.CharField('PV nummer', max_length=50)
+    bvh_nummer = models.CharField('BVH nummer', max_length=50)
+    naam_ovj = models.CharField('Naam Officier van Justitie', max_length=100, null=True, blank=True)
+    parket_nummer =  models.CharField(max_length=100, null=True, blank=True)
+    rc_nummer = models.CharField(max_length=100, null=True, blank=True)
+
+    verbalisanten = models.ManyToManyField(Verbalisant, blank=True)
+
+    rechtspersoon = models.ForeignKey(RechtsPersoon, on_delete=models.SET_NULL, null=True)
+    natuurlijkpersoon = models.ForeignKey(NatuurlijkPersoon, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"PV Verdenking - {self.pv_nummer} (#{self.pk})"
+
+
+##################################
+# Model: BOBAanvraag
+##################################
 class BOBAanvraag(models.Model):
-
     unique_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True) # unique id`
-    #id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False) # as primary key
-
     naam_ovj = models.CharField('Naam Officier van Justitie', max_length=100, null=True, blank=True)
     parket_nummer =  models.CharField(max_length=100, null=True, blank=True)
     naam_onderzoek = models.CharField(max_length=200, null=True, blank=True)
@@ -43,9 +98,6 @@ class BOBAanvraag(models.Model):
                                              default=False)
     mondeling_aanvraag_datum = models.DateField(blank=True, null=True)
 
-
-    # pv fields
-    pv_nummer = models.CharField('PV nummer', max_length=50)
 
     onderzoeksbelang_toelichting = models.TextField('Toelichting op het onderzoeksbelang:', null=True, blank=True)
 
@@ -66,6 +118,10 @@ class BOBAanvraag(models.Model):
 
     status = FSMField(default='aangemaakt')
 
+    # PV FKs
+    pv_verdenking = models.ForeignKey(PvVerdenking, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # owner of instance
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                                    related_name='created_bob_aanvragen', null=True,blank=True)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
@@ -74,7 +130,7 @@ class BOBAanvraag(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"#{self.id}) - PV: {self.pv_nummer}"
+        return f"<BOB aanvraag #{self.id}>"
 
     def get_absolute_url(self):
         return reverse('bobaanvraag-detail', args=[str(self.id)])
@@ -95,7 +151,7 @@ class BOBAanvraag(models.Model):
 
     @property
     def is_editable(self):
-        generator = self.get_available_user_status_transitions(user=self.owner)
+        generator = self.get_available_user_status_transitions(user=self.created_by)
         available_transitions = [(t.name, t.name) for t in generator]
         if len(available_transitions)>0:
             return True
