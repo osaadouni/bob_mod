@@ -5,11 +5,15 @@ from django.utils.translation import ugettext_lazy as _
 
 from bootstrap_datepicker_plus import DatePickerInput
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div, Field, Button
+from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div, Field, Button, MultiField
 from crispy_forms.bootstrap import FieldWithButtons,StrictButton, AppendedText, PrependedText, PrependedAppendedText
 from crispy_forms.bootstrap import InlineRadios
 
-from .models import BOBAanvraag
+from betterforms.forms import BetterForm, BetterModelForm
+from betterforms.multiform import MultiModelForm
+
+from .models import BOBAanvraag, PvVerdenking, Verbalisant, RechtsPersoon, NatuurlijkPersoon
+from .custom_layout_object import VerbalisantFormSection
 
 
 class BOBAanvraagForm(forms.ModelForm):
@@ -125,13 +129,9 @@ class BOBAanvraagStatusForm(forms.Form):
         fields = ('next_status',)
 
     def __init__(self, *args, **kwargs):
-
         available_transitions = kwargs.pop('available_transitions')
-
         super().__init__(*args, **kwargs)
-
         self.fields['next_status'].choices = available_transitions
-
         self.helper = FormHelper()
         self.helper.form_class = 'inline-form'
         self.helper.form_action = "."
@@ -146,3 +146,107 @@ class BOBAanvraagStatusForm(forms.Form):
             )
         )
 
+################################
+# Form: PV Verdenking
+################################
+
+# VerbalisantLayout
+class VerbalisantLayout(Layout):
+    def __init__(self, *args, **kwargs):
+        super(VerbalisantLayout, self).__init__(
+            Field('verbalisanten', template='resources/verbalisanten.html'),
+        )
+
+
+# PersoonLayout
+class PersoonLayout(Layout):
+    def __init__(self, *args, **kwargs):
+        super(PersoonLayout, self).__init__(
+            Field('rechtspersoon', template='resources/persoon_form.html'),
+            Field('natuurlijkpersoon', template='resources/persoon_form.html'),
+        )
+
+# PvVerdenkingLayout
+class PvVerdenkingLayout(Layout):
+    def __init__(self, *args, **kwargs):
+        super(PvVerdenkingLayout,self).__init__(
+            Fieldset('PV verdenking',
+                Row(
+                    Field('pv_nummer', wrapper_class='col-sm-6'),
+                    Field('bvh_nummer', wrapper_class='col-sm-6'),
+                    Field('naam_ovj', wrapper_class='col-sm-6'),
+                    Field('parket_nummer', wrapper_class='col-sm-6'),
+                    Field('rc_nummer', wrapper_class='col-sm-6'),
+                    css_class='form-row'
+                ),
+                css_class='border p-3 shadow-sm'
+            )
+        )
+
+class PvVerdenkingForm(forms.ModelForm):
+    class Meta:
+        model = PvVerdenking
+        exclude = ()
+        #fields = ('pv_nummer', 'bvh_nummer')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_class = 'inline-form'
+        self.helper.form_action = "."
+        self.helper.form_method = "post"
+        self.helper.form_id = 'pvVerdenkingFormId'
+        self.helper.attrs = {'novalidate': 'true'}
+        self.helper.layout = Layout(
+
+            PvVerdenkingLayout(),
+            VerbalisantLayout(),
+            PersoonLayout(),
+            Div(
+                Submit('btn_submit_id', 'Volgende &raquo;', css_class='btn-politie float-right btn-submit'),
+                css_class='d-flex justify-content-end p-2'
+            ),
+
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_data['naam'] = 'test naam'
+
+
+
+class VerbalisantForm(forms.ModelForm):
+    class Meta:
+        model = Verbalisant
+        fields = ('naam', 'rang', 'email') # '__all__'
+        #fieldsets = (
+        #    Fieldset('Verbalisanten', fields=('naam', 'rang', 'email'), legend='Verbalisanten'),
+        #)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+        )
+
+
+class RechtsPersoonForm(forms.ModelForm):
+    class Meta:
+        model = RechtsPersoon
+        fields = '__all__'
+
+
+class NatuurlijkPersoonForm(forms.ModelForm):
+    class Meta:
+        model = NatuurlijkPersoon
+        fields = '__all__'
+
+
+
+
+class PvMultiForm(MultiModelForm):
+    form_classes = {
+        'verdenking': PvVerdenkingForm,
+        'verbalisant': VerbalisantForm,
+    }

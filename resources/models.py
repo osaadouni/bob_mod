@@ -56,7 +56,7 @@ class RechtsPersoon(Persoon):
 # Model: Verbalisant
 ##################################
 class Verbalisant(models.Model):
-    naam = models.CharField('Naam', max_length=100)
+    naam = models.CharField('Naam', max_length=100, null=True, blank=True)
     email = models.EmailField()
     rang = models.CharField('Rang', max_length=100)
 
@@ -74,10 +74,10 @@ class PvVerdenking(models.Model):
     parket_nummer =  models.CharField(max_length=100, null=True, blank=True)
     rc_nummer = models.CharField(max_length=100, null=True, blank=True)
 
-    verbalisanten = models.ManyToManyField(Verbalisant, blank=True)
+    verbalisanten = models.ManyToManyField(Verbalisant, blank=True, null=True)
 
-    rechtspersoon = models.ForeignKey(RechtsPersoon, on_delete=models.SET_NULL, null=True)
-    natuurlijkpersoon = models.ForeignKey(NatuurlijkPersoon, on_delete=models.SET_NULL, null=True)
+    rechtspersoon = models.ForeignKey(RechtsPersoon, on_delete=models.SET_NULL, null=True, blank=True)
+    natuurlijkpersoon = models.ForeignKey(NatuurlijkPersoon, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"PV Verdenking - {self.pv_nummer} (#{self.pk})"

@@ -1,0 +1,46 @@
+{% comment %}{{ object }} {% endcomment %}
+<div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ field.label }}</h5>
+
+            {% for verb in object.pv_verdenking.verbalisanten.all %}
+            <p class="card-text">
+                <div class="row form-row">
+                    <div class="form-group col-sm-6">
+                        <label for="id_{{ field.name }}-naam">Naam: </label>
+                        <input type="text" name="{{ field.name }}-naam" id="id_{{ field.name }}-naam" value="{{ verb.naam }}" class="form-control">
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label for="id_{{ field.name }}-rang">Rang:</label>
+                        <input type="text" name="{{ field.name }}-rang" id="id_{{ field.name }}-rang" value="{{ verb.rang }}" class="form-control">
+                    </div>
+                </div>
+                <div class="row form-row">
+                    <div class="form-group col-sm-6">
+                        <label for="id_{{ field.name }}-email">Email:</label>
+                        <input type="text" name="{{ field.name }}-email" id="id_{{ field.name }}-email" value="{{ verb.email }}" class="form-control">
+                    </div>
+                </div>
+             </p>
+            {% empty %}
+                <p class="card-text">
+                    <div class="row form-row">
+                        <div class="form-group col-sm-6">
+                            <label for="id_{{ field.name }}-naam">Naam: </label>
+                            <input type="text" name="{{ field.name }}-naam" id="id_{{ field.name }}-naam" value="{{ verb.naam }}" class="form-control">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="id_{{ field.name }}-rang">Rang:</label>
+                            <input type="text" name="{{ field.name }}-rang" id="id_{{ field.name }}-rang" value="{{ verb.rang }}" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row form-row">
+                        <div class="form-group col-sm-6">
+                            <label for="id_{{ field.name }}-email">Email:</label>
+                            <input type="text" name="{{ field.name }}-email" id="id_{{ field.name }}-email" value="{{ verb.email }}" class="form-control">
+                        </div>
+                    </div>
+                </p>
+            {% endfor %}
+        </div>
+    </div>

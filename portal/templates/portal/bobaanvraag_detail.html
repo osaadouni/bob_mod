@@ -37,8 +37,14 @@
 
             {% if form %}
                 <hr class="mb-4"/>
-                {% crispy form %}
+                {% crispy form form.helper %}
             {% endif %}
+
+        {% comment %}
+        <form method="post">
+            % include 'portal/form_as_fieldsets.html' %}
+        </form>
+        {% endcomment %}
 
       </div>
       {% if form %}

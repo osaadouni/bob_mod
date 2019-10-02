@@ -63,5 +63,28 @@ $(function($) {
 
         });
 
+        // Autocomplete id_pv_nummer
+        $('#id_pv_nummer').autocomplete({
+            lookup: function (query, done) {
+                // Do Ajax call or lookup locally, when done,
+                // call the callback and pass your results:
+                var result = {
+                    suggestions: [
+                        { "value": "United Arab Emirates", "data": "AE" },
+                        { "value": "United Kingdom",       "data": "UK" },
+                        { "value": "United States",        "data": "US" },
+                        { "value": "PV1111",        "data": "pv1111" },
+                    ]
+                };
+
+                done(result);
+            },
+            onSelect: function (suggestion) {
+                alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
+            }
+        });
+
+
+
     }); // end document.ready()
 });
