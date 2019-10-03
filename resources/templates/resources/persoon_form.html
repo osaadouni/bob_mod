@@ -1,0 +1,71 @@
+{% load getattribute %}
+{% comment %}
+{{ field.id_for_label }} - {{ field.label }} - {{ field.name }} - {{ field.value }} - {{ field.related_model }} -
+{{ field }}
+{{ object }}
+{% endcomment %}
+{% if object.pv_verdenking %}
+    {% with ""|add:field.name as persoon %}
+        {% comment %}{{ object.pv_verdenking|getattribute:persoon|getattribute:'voornaam' }} {% endcomment %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ field.label }}</h5>
+                <p class="card-text">
+                    <div class="row form-row">
+                        <div class="form-group col-sm-6">
+                            <label for="id_{{ field.name }}-voornaam">Voornaam:</label>
+                            <input type="text" id="id_{{ field.name }}-voornaam" name="{{ field.name }}-voornaam" class="form-control" value="{{ object.pv_verdenking|getattribute:persoon|getattribute:'voornaam' }}">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="id_{{ field.name }}_achternaam">Achternaam:</label>
+                            <input type="text" id="id_{{ field.name }}-achternaam" name="{{ field.name }}-achternaam"
+                                   class="form-control" value="{{ object.pv_verdenking|getattribute:persoon|getattribute:'achternaam' }}">
+                        </div>
+                    </div>
+                    <div class="row form-row">
+                        <div class="form-group col-sm-6">
+                            <label for="id_{{ field.name }}_email">E-mail:</label>
+                            <input type="text" id="id_{{ field.name }}-email" name="{{ field.name }}-email" class="form-control"
+                                   value="{{ object.pv_verdenking|getattribute:persoon|getattribute:'email' }}">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="id_{{ field.name }}_mobiel">Mobiel:</label>
+                            <input type="text" id="id_{{ field.name }}-mobiel" name="{{ field.name }}-mobiel"
+                                   value="{{ object.pv_verdenking|getattribute:persoon|getattribute:'mobiel' }}"
+                                   class="form-control">
+                        </div>
+                    </div>
+                </p>
+            </div>
+        </div>
+    {% endwith %}
+
+{% else %}
+    <div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">{{ field.label }}</h5>
+        <p class="card-text">
+        <div class="row form-row">
+            <div class="form-group col-sm-6">
+                <label for="id_{{ field.name }}-voornaam">Voornaam:</label>
+                <input type="text" id="id_{{ field.name }}-voornaam" name="{{ field.name }}-voornaam" class="form-control" ">
+            </div>
+            <div class="form-group col-sm-6">
+                <label for="id_{{ field.name }}_achternaam">Achternaam:</label>
+                <input type="text" id="id_{{ field.name }}-achternaam" name="{{ field.name }}-achternaam" class="form-control">
+            </div>
+        </div>
+        <div class="row form-row">
+            <div class="form-group col-sm-6">
+                <label for="id_{{ field.name }}_email">E-mail:</label>
+                <input type="text" id="id_{{ field.name }}-email" name="{{ field.name }}-email" class="form-control">
+            </div>
+            <div class="form-group col-sm-6">
+                <label for="id_{{ field.name }}_mobiel">Mobiel:</label>
+                <input type="text" id="id_{{ field.name }}-mobiel" name="{{ field.name }}-mobiel" class="form-control">
+            </div>
+        </div>
+        </p>
+    </div>
+
+{% endif %}
