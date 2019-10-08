@@ -1,0 +1,17 @@
+<div class="row form-row pv-verb-row">
+    <div class="col">
+        <span class="verb-index">{{ index }}</span>
+    </div>
+    <div class="form-group col-sm-3">
+        <input type="text" name="{{ prefix }}-naam-{{ index }}" id="id_{{ prefix }}-naam-{{ index }}" value="{% if obj %}{{ obj.naam }}{% endif %}" class="form-control" placeholder="Naam...">
+    </div>
+    <div class="form-group col-sm-3">
+        <input type="text" name="{{ prefix }}-rang-{{ index }}" id="id_{{ prefix }}-rang-{{ index }}" value="{% if obj %}{{ obj.rang }}{% endif %}" class="form-control" placeholder="Rang...">
+    </div>
+    <div class="form-group col-sm-4">
+        <input type="text" name="{{ prefix }}-email-{{ index }}" id="id_{{ prefix }}-email-{{ index }}" value="{% if obj %}{{ obj.email }}{% endif %}" class="form-control" placeholder="Email..">
+    </div>
+    <div class="col">
+        <span><i class="fa fa-times btn-verb-del "></i></span>
+    </div>
+</div>

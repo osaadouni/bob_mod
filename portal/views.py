@@ -11,8 +11,9 @@ from django.core import paginator
 from django.core.paginator import Paginator, PageNotAnInteger
 from django_tables2 import RequestConfig, SingleTableView, SingleTableMixin
 from django_filters.views import FilterView
-
-
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.template import RequestContext
 
 from resources.models import BOBAanvraag, PvVerdenking, Verbalisant, RechtsPersoon, NatuurlijkPersoon, Persoon
 from resources.forms import BOBAanvraagForm, BOBAanvraagStatusForm, BOBAanvraagFilterFormHelper, \
@@ -100,6 +101,7 @@ class BOBAanvraagDetailView(LoginRequiredMixin, View):
 
 
 
+# BOB aanvraag detail view
 class BOBAanvraagDetailDisplayView(LoginRequiredMixin, DetailView, FormView):
     model = BOBAanvraag
     template_name = 'portal/bobaanvraag_detail.html'
@@ -119,36 +121,62 @@ class BOBAanvraagDetailDisplayView(LoginRequiredMixin, DetailView, FormView):
         print(f"{self.__class__.__name__}::get_context_data()")
         context = super().get_context_data(**kwargs)
 
+        # set object
+        self.object = self.get_object()
+        print(f"self.object: {self.object}")
+
         # get fields
-        fields = [field.name for field in self.object._meta.fields]
+        fields = [{'name': field.name, 'label': field.verbose_name, 'value': field.value_from_object(self.object)} for field in self.object._meta.get_fields()]
+        #:w
+        # fields = [field.name for field in self.object._meta.get_fields()]
         print(fields)
         context['fields'] = fields
 
-        # get PV verdenking details
-        self.object = self.get_object()
-        print(f"self.object: {self.object}")
-        if self.object.pv_verdenking is None:
-            form = PvVerdenkingForm()
-        else:
+        # check if PV verdenking exists
+        pvv_url = None
+        if self.object.pv_verdenking is not None:
             form = PvVerdenkingForm(instance=self.object.pv_verdenking)
+            pvv_url = reverse('portal:portal-pvv-detail', args=[str(self.object.pk), str(self.object.pv_verdenking.pk)])
+        else:
+            form = PvVerdenkingForm()
+            pvv_url = reverse('portal:portal-pvv-create', args=[str(self.object.pk)])
 
         form.helper.form_action = reverse('portal:portal-detail', args=[str(self.object.pk)])
         context['form'] = form
+        context['pvv_url'] = pvv_url
         return context
 
-        available_transitions = [(t.name, t.name) for t in self.object.get_available_user_status_transitions(user=self.request.user)]
-        print(available_transitions)
-        if len(available_transitions) > 0:
-            form = BOBAanvraagStatusForm(available_transitions=available_transitions)
-            form.helper.form_action = reverse('portal:portal-detail', args=[str(self.object.pk)])
-            context['form'] = form
+        #available_transitions = [(t.name, t.name) for t in self.object.get_available_user_status_transitions(user=self.request.user)]
+        #print(available_transitions)
+        #if len(available_transitions) > 0:
+        #    form = BOBAanvraagStatusForm(available_transitions=available_transitions)
+        #    form.helper.form_action = reverse('portal:portal-detail', args=[str(self.object.pk)])
+        #    context['form'] = form
         return context
 
 
-class BOBAanvraagDetailFormView(LoginRequiredMixin, FormView):
-    template_name = 'portal/bobaanvraag_detail.html'
-    form_class = BOBAanvraagStatusForm
+############################################################
+# PV verdenking Views
+############################################################
+class PvVerdenkingCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'portal/pv_verdenking_form.html'
+    form_class = PvVerdenkingForm
     model = PvVerdenking
+
+    def get_context_data(self, **kwargs):
+
+        print(f"{self.__class__.__name__}::get_context_data()")
+        context = super().get_context_data(**kwargs)
+        aanvraag_id = self.kwargs.get('aanvraag_id', None)
+        aanvraag = get_object_or_404(BOBAanvraag, pk=aanvraag_id)
+        print(f"aanvraag: {aanvraag}")
+
+        # set object
+        form = PvVerdenkingForm()
+
+        form.helper.form_action = reverse('portal:portal-pvv-create', args=[str(aanvraag_id)])
+        context['form'] = form
+        return context
 
     def post(self, request, *args, **kwargs):
         """
@@ -160,17 +188,17 @@ class BOBAanvraagDetailFormView(LoginRequiredMixin, FormView):
         """
         print(f"{self.__class__.__name__}::post()")
         print(f"POST: {self.request.POST}")
-        pk = kwargs.get('pk', None)
-        print(f"pk: {pk}")
+        self.aanvraag_id = kwargs.get('aanvraag_id', None)
+        print(f"aanvraag_id: {self.aanvraag_id}")
 
         #next_status = self.request.POST.get('next_status', None)
-        aanvraag = get_object_or_404(BOBAanvraag, pk=pk)
+        self.aanvraag = get_object_or_404(BOBAanvraag, pk=self.aanvraag_id)
 
-        verb_form = VerbalisantForm(self.request.POST, prefix='verbalisanten')
+        verb_form = VerbalisantForm(self.request.POST)
         print(verb_form)
-        rp_form = RechtsPersoonForm(self.request.POST, prefix='rechtspersoon')
+        rp_form = RechtsPersoonForm(self.request.POST)
         print(rp_form)
-        np_form = NatuurlijkPersoonForm(self.request.POST, prefix='natuurlijkpersoon')
+        np_form = NatuurlijkPersoonForm(self.request.POST)
         print(np_form)
 
         pv_form = PvVerdenkingForm(self.request.POST)
@@ -185,7 +213,7 @@ class BOBAanvraagDetailFormView(LoginRequiredMixin, FormView):
             print("verb_form is valid")
         else:
             print("verb_form is invalid")
-            print(verb_form.errors)
+            #print(verb_form.errors)
 
         if rp_valid:
             print("rp_form is valid")
@@ -204,35 +232,86 @@ class BOBAanvraagDetailFormView(LoginRequiredMixin, FormView):
             print(pv_form.errors)
 
         pv_verdenking = None
-        if verb_valid and np_valid and rp_valid and pv_form:
-            verb = verb_form.save()
+        if pv_valid:
+            pv_verdenking = pv_form.save(commit=False)
+
+        if np_valid:
             np = np_form.save()
+            pv_verdenking.natuurlijkpersoon = np
+
+        if rp_valid:
             rp = rp_form.save()
+            pv_verdenking.rechtspersoon = rp
 
-            pv = pv_form.save(commit=False)
-            pv.rechtspersoon = rp
-            pv.natuurlijkpersoon = np
+        # save the pv model instance (
+        pv_verdenking.save()
 
-            pv.save()
-            pv.verbalisanten.add(verb)
+        for i in range(1, 10):
 
-            print(f"\npv: {pv}\n")
-            pv_verdenking = pv
+            naam = self.request.POST.get('{}-naam-{}'.format(VerbalisantForm.prefix, i), None)
+            rang = self.request.POST.get('{}-rang-{}'.format(VerbalisantForm.prefix, i), None)
+            email = self.request.POST.get('{}-email-{}'.format(VerbalisantForm.prefix, i), None)
 
-        self.object = aanvraag
-        if not pv_verdenking is None:
-            aanvraag.pv_verdenking = pv_verdenking
-            aanvraag.save()
-            messages.add_message(request, messages.SUCCESS, 'PV verdenking is successvol ingevuld.')
-        else:
-            print("pv verdenking is none")
+            if naam and rang and email:
+                print(f"verb {i}: {naam}, {rang}, {email}")
+                verb = Verbalisant(naam=naam, rang=rang, email=email)
+                verb.save()
+                pv_verdenking.verbalisanten.add(verb)
 
+
+        # save m2m
+        #pv_verdenking.save_m2m()
+
+        # add object
+        self.object = pv_verdenking
+
+        # assign pv verdenking to aanvraag
+        self.aanvraag.pv_verdenking = pv_verdenking
+        self.aanvraag.save()
+        messages.add_message(request, messages.SUCCESS, 'PV verdenking is successvol ingevuld.')
         return redirect(self.get_success_url())
 
+
+    def render_to_response(self, context, **response_kwargs):
+        print(f"{self.__class__.__name__}::render_to_response()")
+        rendered = render_to_string(self.template_name, context, self.request)
+        return JsonResponse({'html': rendered})
+
     def get_success_url(self):
-        return reverse('portal:portal-detail', kwargs={'pk': self.object.pk})
+        return reverse('portal:portal-pvv-detail', kwargs={'aanvraag_id': self.aanvraag_id, 'pk': self.object.pk})
 
 
+# PV Verdenking detail view
+class PvVerdenkingDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'portal/pv_verdenking_detail.html'
+    form_class = PvVerdenkingForm
+    model = PvVerdenking
+
+
+    def get_context_data(self, **kwargs):
+
+        print(f"{self.__class__.__name__}::get_context_data()")
+        context = super().get_context_data(**kwargs)
+
+        # set object
+        self.object = self.get_object()
+        print(f"self.object: {self.object}")
+
+        # get fields
+        fields = [{'name': field.name, 'label': field.verbose_name, 'value': field.value_from_object(self.object)}
+                  for field in self.object._meta.get_fields() if not field.is_relation]
+        print(fields)
+        context['fields'] = fields
+        return context
+
+    def render_to_response(self, context, **response_kwargs):
+        print(f"{self.__class__.__name__}::render_to_response()")
+        rendered = render_to_string(self.template_name, context, self.request)
+        return JsonResponse({'html': rendered})
+
+####################################
+# END PV van verdenking
+####################################
 
 class BOBAanvraagDetailStatusView(LoginRequiredMixin, FormView):
     template_name = 'portal/bobaanvraag_detail.html'
@@ -328,3 +407,51 @@ class BOBAanvraagListView(LoginRequiredMixin, SingleTableView, FilterView):
         return context
 
 
+################################################
+# JSON response mixin
+################################################
+class JSONResponseMixin:
+    """
+    A mixin that can be used to render a JSON response.
+    """
+    def render_to_json_response(self, context, **response_kwargs):
+        """
+        Returns a JSON response, transforming 'context' to make the payload.
+        """
+        return JsonResponse(
+            self.get_data(context),
+            **response_kwargs
+        )
+
+    def get_data(self, context):
+        """
+        Returns an object that will be serialized as JSON by json.dumps().
+        """
+        # Note: This is *EXTREMELY* naive; in reality, you'll need
+        # to do much more complex handling to ensure that arbitrary
+        # objects -- such as Django model instances or querysets
+        # -- can be serialized as JSON.
+        return context
+
+################################################
+# VERBALISANT VIEWS                            #
+################################################
+class VerbalisantCreateView(JSONResponseMixin, CreateView):
+    template_name = 'resources/verbalisant_part.html'
+    form_class = VerbalisantForm
+
+    def get_context_data(self, **kwargs):
+        print(f"{self.__class__.__name__}::get_context_data()")
+        context = super().get_context_data(**kwargs)
+        row_index = self.request.GET.get('row_index', 1)
+        print(f"{self.__class__.__name__}::row_index: {row_index}")
+
+        form = self.form_class()
+        context['index'] = row_index
+        context['prefix'] = form.prefix
+        return context
+
+    def render_to_response(self, context, **response_kwargs):
+        print(f"{self.__class__.__name__}::render_to_response()")
+        rendered = render_to_string(self.template_name, context, self.request)
+        return JsonResponse({'html': rendered})

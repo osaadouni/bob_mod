@@ -19,4 +19,10 @@ urlpatterns = [
     path('list/', views.BOBAanvraagListView.as_view(), name='portal-list'),
 
 
+    # PV verdenking
+    path('detail/<int:aanvraag_id>/pvv/add', views.PvVerdenkingCreateView.as_view(), name='portal-pvv-create'),
+    path('detail/<int:aanvraag_id>/pvv/detail/<int:pk>', views.PvVerdenkingDetailView.as_view(), name='portal-pvv-detail'),
+    # verbalisant
+    path('verbalisant/add', views.VerbalisantCreateView.as_view(), name='verbalisant-create'),
+
 ]

@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from bootstrap_datepicker_plus import DatePickerInput
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, ButtonHolder, Submit, Row, Column, Fieldset, Div, Field, Button, MultiField
+from crispy_forms.utils import TEMPLATE_PACK
 from crispy_forms.bootstrap import FieldWithButtons,StrictButton, AppendedText, PrependedText, PrependedAppendedText
 from crispy_forms.bootstrap import InlineRadios
 
@@ -16,6 +17,25 @@ from .models import BOBAanvraag, PvVerdenking, Verbalisant, RechtsPersoon, Natuu
 from .custom_layout_object import VerbalisantFormSection
 
 
+#################################
+# Custom Crispy Field
+#################################
+class CustomCrispyField(Field):
+    extra_context = {}
+
+    def __init__(self, *args, **kwargs):
+        self.extra_context = kwargs.pop('extra_context', self.extra_context)
+        super(CustomCrispyField, self).__init__(*args, **kwargs)
+
+    def render(self, form, form_style, context, template_pack=TEMPLATE_PACK, extra_context=None, **kwargs):
+        if self.extra_context:
+            extra_context = extra_context.update(self.extra_context) if extra_context else self.extra_context
+        return super(CustomCrispyField, self).render(form, form_style, context, template_pack, extra_context, **kwargs)
+
+
+########################################
+# BOBAanvraag Form
+########################################
 class BOBAanvraagForm(forms.ModelForm):
     mondeling_aanvraag_datum = forms.DateField(
         label='Datum mondelinge aanvraag',
@@ -106,6 +126,9 @@ class BOBAanvraagForm(forms.ModelForm):
 
 
 
+###############################################
+# BOBAanvraag Filter Form helpr
+###############################################
 class BOBAanvraagFilterFormHelper(FormHelper):
     form_method = 'GET'
     form_class = 'form-inline'
@@ -123,6 +146,9 @@ class BOBAanvraagFilterFormHelper(FormHelper):
     #)
 
 
+###############################################
+# BOBAanvraag Status Form
+###############################################
 class BOBAanvraagStatusForm(forms.Form):
     next_status = forms.ChoiceField(label="Ik wil deze aanvraag: ", widget=forms.Select(), choices=[], required=True)
     class Meta:
@@ -147,14 +173,16 @@ class BOBAanvraagStatusForm(forms.Form):
         )
 
 ################################
-# Form: PV Verdenking
+# PV Verdenking: Layouts & Form
 ################################
 
 # VerbalisantLayout
 class VerbalisantLayout(Layout):
     def __init__(self, *args, **kwargs):
+        prefix = kwargs.pop('prefix')
+        print(f"{self.__class__.__name__}::prefix={prefix}")
         super(VerbalisantLayout, self).__init__(
-            Field('verbalisanten', template='resources/verbalisanten.html'),
+            CustomCrispyField('verbalisanten', template='resources/verbalisanten.html', extra_context={'prefix': prefix}),
         )
 
 
@@ -165,6 +193,41 @@ class PersoonLayout(Layout):
             Field('rechtspersoon', template='resources/persoon_form.html'),
             Field('natuurlijkpersoon', template='resources/persoon_form.html'),
         )
+
+# Verbalisant Form
+class VerbalisantForm(forms.ModelForm):
+    prefix = 'verbalisant'
+    class Meta:
+        model = Verbalisant
+        fields = ('naam', 'rang', 'email') # '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        print(f"{self.__class__.__name__}::__init__()")
+        print(f"{self.__class__.__name__}::self.prefix={self.prefix}")
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            VerbalisantLayout(prefix=self.prefix),
+        )
+
+
+# Rechtspersoon Form
+class RechtsPersoonForm(forms.ModelForm):
+    prefix = 'rechtspersoon'
+    class Meta:
+        model = RechtsPersoon
+        fields = '__all__'
+
+
+# Natuurlijk Persoon Form
+class NatuurlijkPersoonForm(forms.ModelForm):
+    prefix = 'natuurlijkpersoon'
+    class Meta:
+        model = NatuurlijkPersoon
+        fields = '__all__'
+
+
 
 # PvVerdenkingLayout
 class PvVerdenkingLayout(Layout):
@@ -184,6 +247,7 @@ class PvVerdenkingLayout(Layout):
         )
 
 class PvVerdenkingForm(forms.ModelForm):
+    prefix = 'pv_verdenking'
     class Meta:
         model = PvVerdenking
         exclude = ()
@@ -200,10 +264,12 @@ class PvVerdenkingForm(forms.ModelForm):
         self.helper.layout = Layout(
 
             PvVerdenkingLayout(),
-            VerbalisantLayout(),
             PersoonLayout(),
+            #VerbalisantLayout(),
+            VerbalisantForm().helper.layout,
+
             Div(
-                Submit('btn_submit_id', 'Volgende &raquo;', css_class='btn-politie float-right btn-submit'),
+                Submit('btn_submit_id', 'Opslaan &raquo;', css_class='btn-politie float-right'),
                 css_class='d-flex justify-content-end p-2'
             ),
 
@@ -214,39 +280,10 @@ class PvVerdenkingForm(forms.ModelForm):
         cleaned_data['naam'] = 'test naam'
 
 
-
-class VerbalisantForm(forms.ModelForm):
-    class Meta:
-        model = Verbalisant
-        fields = ('naam', 'rang', 'email') # '__all__'
-        #fieldsets = (
-        #    Fieldset('Verbalisanten', fields=('naam', 'rang', 'email'), legend='Verbalisanten'),
-        #)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_tag = False
-        self.helper.layout = Layout(
-        )
-
-
-class RechtsPersoonForm(forms.ModelForm):
-    class Meta:
-        model = RechtsPersoon
-        fields = '__all__'
-
-
-class NatuurlijkPersoonForm(forms.ModelForm):
-    class Meta:
-        model = NatuurlijkPersoon
-        fields = '__all__'
-
-
-
-
 class PvMultiForm(MultiModelForm):
     form_classes = {
         'verdenking': PvVerdenkingForm,
         'verbalisant': VerbalisantForm,
     }
+
+

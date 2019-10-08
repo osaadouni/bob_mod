@@ -1,46 +1,22 @@
 {% comment %}{{ object }} {% endcomment %}
-<div class="card mb-3">
+<div class="card mb-3 pv-verb-wrapper">
         <div class="card-body">
-            <h5 class="card-title">{{ field.label }}</h5>
-
-            {% for verb in object.pv_verdenking.verbalisanten.all %}
-            <p class="card-text">
-                <div class="row form-row">
-                    <div class="form-group col-sm-6">
-                        <label for="id_{{ field.name }}-naam">Naam: </label>
-                        <input type="text" name="{{ field.name }}-naam" id="id_{{ field.name }}-naam" value="{{ verb.naam }}" class="form-control">
-                    </div>
-                    <div class="form-group col-sm-6">
-                        <label for="id_{{ field.name }}-rang">Rang:</label>
-                        <input type="text" name="{{ field.name }}-rang" id="id_{{ field.name }}-rang" value="{{ verb.rang }}" class="form-control">
-                    </div>
-                </div>
-                <div class="row form-row">
-                    <div class="form-group col-sm-6">
-                        <label for="id_{{ field.name }}-email">Email:</label>
-                        <input type="text" name="{{ field.name }}-email" id="id_{{ field.name }}-email" value="{{ verb.email }}" class="form-control">
-                    </div>
-                </div>
-             </p>
-            {% empty %}
-                <p class="card-text">
-                    <div class="row form-row">
-                        <div class="form-group col-sm-6">
-                            <label for="id_{{ field.name }}-naam">Naam: </label>
-                            <input type="text" name="{{ field.name }}-naam" id="id_{{ field.name }}-naam" value="{{ verb.naam }}" class="form-control">
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="id_{{ field.name }}-rang">Rang:</label>
-                            <input type="text" name="{{ field.name }}-rang" id="id_{{ field.name }}-rang" value="{{ verb.rang }}" class="form-control">
-                        </div>
-                    </div>
-                    <div class="row form-row">
-                        <div class="form-group col-sm-6">
-                            <label for="id_{{ field.name }}-email">Email:</label>
-                            <input type="text" name="{{ field.name }}-email" id="id_{{ field.name }}-email" value="{{ verb.email }}" class="form-control">
-                        </div>
-                    </div>
-                </p>
-            {% endfor %}
+            <div class="d-flex border-bottom mb-2">
+                <h5 class="card-title mr-auto">{{ field.label }}</h5>
+                <span><i class="fa fa-plus-square-o btn-verb-add" aria-hidden="true" data-url="{% url 'portal:verbalisant-create' %}"></i></span>
+            </div>
+            <div class="card-text pv-verb-container mb-2">
+                {% for verb in field %}
+                    {% include "resources/verbalisant_part.html" with obj=verb index=forloop.counter %}
+                {% empty %}
+                    {% include "resources/verbalisant_part.html" with obj=verb index=1 %}
+                {% endfor %}
+            </div>
+            <div class="d-flex border-top mb-2">
+                <span class="ml-auto"><i class="fa fa-plus-square-o btn-verb-add" aria-hidden="true" data-url="{% url 'portal:verbalisant-create' %}"></i></span>
+            </div>
         </div>
-    </div>
+</div>
+
+<input type="hidden" name="verbalisant_total" id="id_verbalisant_total" value="1">
+

@@ -1,0 +1,10 @@
+{% for field in fields %}
+<div class="row">
+    <div class="col-sm-4">
+        <strong>{{ field.label }}</strong>
+    </div>
+    <div class="col">
+        {{ field.value }}
+    </div>
+</div>
+{% endfor %}

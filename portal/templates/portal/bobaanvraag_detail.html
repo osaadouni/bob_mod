@@ -23,22 +23,28 @@
                 </div>
                 {% endfor %}
             {% endif  %}
-            {% for attr in fields %}
+            {% for field in fields %}
             <div class="row">
                 <div class="col-sm-4">
-                     {{ attr }} - {# {% get_field_verbose_name object attr %} #}
+                    <strong>{{ field.label }}</strong>
                 </div>
                 <div class="col">
-                    {{ object|getattribute:attr }}
+                    {{ field.value }}
                 </div>
             </div>
             {% endfor %}
 
+            {{ pvv_url }}
 
+            {% include 'portal/accordion.html' %}
+
+
+        {% comment %}
             {% if form %}
                 <hr class="mb-4"/>
                 {% crispy form form.helper %}
             {% endif %}
+        {% endcomment %}
 
         {% comment %}
         <form method="post">
