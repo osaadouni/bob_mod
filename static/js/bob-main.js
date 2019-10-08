@@ -72,7 +72,7 @@ $(function($) {
                 console.log('form not valid');
                 var elts = document.querySelectorAll('input.form-control:invalid, select.custom-select:invalid');
                 $('html, body').animate({
-                    scrollTop: $(elts[0]).offset().top
+                    scrollTop: $(elts[0]).offset().top-10
                 }, 2000);
                 $form.addClass('was-validated');
                 return false;
@@ -238,6 +238,15 @@ $(function($) {
                     console.log(data);
                     if (typeof undefined !== typeof data.html && false !== data.html) {
                         $(data.html).appendTo($container);
+
+                        $first = $container.find('input[type=text],textarea,select').filter(':visible:first');
+                        console.log('$first.length: ' + $first.length);
+                        if ($first.length) {
+                            $('html, body').animate({
+                                scrollTop: $first.offset().top-100
+                            }, 2000);
+                        }
+
                     }
                 },
                 error: function(jqXhr, textStatus, errorMessage) {
@@ -259,7 +268,7 @@ $(function($) {
                 console.log('form not valid');
                 var elts = document.querySelectorAll('input.form-control:invalid, select.custom-select:invalid');
                 $('html, body').animate({
-                    scrollTop: $(elts[0]).offset().top
+                    scrollTop: $(elts[0]).offset().top-50
                 }, 2000);
                 $form.addClass('was-validated');
                 return false;
