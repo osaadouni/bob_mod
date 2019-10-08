@@ -250,6 +250,21 @@ $(function($) {
         $('body').on('submit', 'form#pvVerdenkingFormId', function(e) {
             console.log('form submitted') ;
             $form = $(this);
+            var form = $form[0];
+
+            console.log(form);
+            if (form.checkValidity() === false ) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('form not valid');
+                var elts = document.querySelectorAll('input.form-control:invalid, select.custom-select:invalid');
+                $('html, body').animate({
+                    scrollTop: $(elts[0]).offset().top
+                }, 2000);
+                $form.addClass('was-validated');
+                return false;
+            }
+            //return false;
 
             $.ajax({
                 type: 'POST',
