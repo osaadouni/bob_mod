@@ -1,3 +1,16 @@
 {% load crispy_forms_tags %}
 
-{% crispy form form.helper %}
+{% comment %}{% crispy form form.helper %} {% endcomment %}
+
+{% if form %}
+    <form method="{{ form.helper.form_method }}" action="{{ form.helper.form_action }}" {% if form.helper.attrs.novalidate %}novalidate="true"{% endif %}
+          {% if form.helper.attrs.enctype %}enctype="{{ form.helper.attrs.enctype }}"{% endif %}
+        class="{{ form.helper.form_class }}">
+        {% csrf_token %}
+        {% for key, sub_form in form.forms.items %}
+            {% crispy sub_form %}
+        {% endfor %}
+
+        <button class="btn btn-primary btn-submit float-right" type="submit"> Submit </button>
+    </form>
+{% endif %}}

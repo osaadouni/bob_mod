@@ -1,5 +1,9 @@
 $(function($) {
 
+    function debug_console(m) {
+        console.log(m);
+    }
+
     function toggleMondelingCheck($ba_mondeling_check) {
 
         $ba_mondeling_datum = $('body').find('div.bobaanvraag-mondeling-datum');
@@ -285,6 +289,153 @@ $(function($) {
             });
             return false;
         });
+        //==========================================
+        // Generic PV Form Validation and processing
+        //==========================================
+        $('body').on('submit', 'form.pv-form-validate', function(e) {
+            e.preventDefault();
+            console.log('[form.pv-form-validate] submit clicked');
+            var $form = $(this);
+
+            var checked = true;
+
+            $fields = $form.find('input[type=text],input[type=file],textarea,select').filter('[required]:visible');
+            debug_console('$fields.length: ' + $fields.length);
+            $fields.each(function () {
+                val = $.trim($(this).val());
+                console.log('=> id: ' +  $(this).attr('id') + '; val: '+ val + '; type: ' + $(this).attr('type'));
+                if ('' == val) {
+                    if ( 'file' === $(this).attr('type')) {
+                        $file_hidden = $(this).closest('div.file-upload-wrapper').find('input[type=hidden].hidden-pdf-document');
+                        if ($file_hidden.length) {
+                            var h_value = $.trim($file_hidden.val());
+                            console.log('h_value: ' + h_value);
+                            if ( '' !== h_value) {
+                                return true;
+                            }
+                        }
+                    }
+                    $(this).addClass('is-invalid');
+                    $par = $(this).closest('div');
+                    $par.find('div.invalid-feedback,div.valid-feedback').remove();
+                    $par.append($('<div class="invalid-feedback">Dit veld is verplicht.</div>'));
+                    $(this).closest('div.form-group').find('label').addClass('np-error');
+                    checked = false;
+                }
+            })
+            debug_console('checked = ', checked);
+            if (!checked) {
+                 debug_console('validation failed!, form.length: ' +  $form.length );
+                 var $elts = $form.find('input.form-control.is-invalid,input[type=file].is-invalid,input.custom-file-input,select.custom-select.is-invalid,textarea.form-control.is-invalid');
+                 debug_console('$elts.length: '+ $elts.length);
+                 $elts.each(function() {
+                     debug_console(' => '+ $(this).attr('id')) ;
+                 });
+                 var $focus = undefined;
+                 if ( $elts.length ) {
+                        $focus = $elts.first();
+                 } else {
+                        $focus = $form;
+                 }
+                 debug_console('$focus.length: ' + $focus.length) ;
+                 if ($focus.length) {
+                     $('html, body').animate({
+                         scrollTop: $focus.offset().top - 50
+                     }, 1000);
+                 }
+                 return false;
+            }
+
+
+            var form  = $form[0]
+            console.log(form);
+            var formData  = new FormData(form);
+            console.log(formData);
+            var $content_wrapper =  $form.closest('div.pv-tab-content-wrapper');
+            console.log('$content_wrapper.length: '+ $content_wrapper.length);
+            if (!$content_wrapper.length) {
+                console.log('content wrapper missing');
+                return false;
+            }
+            var $collapse_wrapper =  $content_wrapper.closest('div.collapse');
+            console.log('$collapse_wrapper.length: '+ $collapse_wrapper.length);
+            if (!$collapse_wrapper.length) {
+                console.log('collapse wrapper missing');
+                return false;
+            }
+            //$('body').find('div.loading').show();
+            $.ajax({
+                type: $form.attr('method'),
+                url: $form.attr('action'),
+                data: formData, // $form.serialize(),
+                enctype: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                cache: false,
+                success: function(data) {
+                    //console.log(data);
+                    console.log('back on track ');
+                    $('body').find('div.loading').hide();
+                    if (typeof undefined !== typeof data.html &&  false !== data.html ) {
+                        $content_wrapper.html(data.html);
+                    }
+                    if (typeof undefined !== typeof data.detail_url &&  false !== data.detail_url ) {
+                        console.log('update data-url with detail_url: ' + data.detail_url);
+                        $collapse_wrapper.attr('data-url',  data.detail_url);
+                    }
+                },
+                error: function(data) {
+                    console.log('error');
+                }
+            })
+            return false;
+        });
+
+        $('input.form-control,select.form-control, textarea.form-control').on('click ', function (e) {
+            //e.preventDefault();
+            //e.stopPropagation();
+            $(this).removeClass('is-invalid');
+            $(this).closest('div.form-group').find('label').removeClass('np-error');
+        });
+
+        $('body').on('click', 'form input.form-control,input[type=file],select.form-control,select.custom-control,textarea.form-control', function (e) {
+            //e.preventDefault();
+            //e.stopPropagation();
+            $(this).removeClass('is-invalid');
+            $(this).closest('div.form-group').find('label').removeClass('np-error');
+        });
+
+
+        //  entity type check event
+        $('body').on('click', 'input[type=radio].entity-type-check', function(e) {
+            e.stopPropagation();
+            var val = $(this).val();
+            console.log('[entity-type]selected : ' + val);
+
+            var $form = $(this).closest('form.pv-form-validate');
+            if ( $form.length) {
+                $form.find('input[type=radio].entity-type-check').removeAttr('checked');
+                $(this).attr('checked', 'checked');
+            }
+
+
+            $('body').find('div.pv-entity-type').hide();
+            var type = val;
+            if (type == 'on') { type = 'np';}
+            $entity_container = $('body').find('div.pv-entity-type[data-entity-type="'+type+'"]');
+            console.log('$entity_container.length: '+ $entity_container.length);
+            $entity_container.show();
+            if ( val == 'on') {
+
+                $entity_container.find('input,select,textarea').val('');
+                var input_value = $.trim($entity_container.find('input[name*="achternaam"]').val());
+                if ( '' === input_value) {
+                    $entity_container.find('input[name*="achternaam"]').val('NN');
+                }
+            }
+        });
+
+
 
     }); // end document.ready()
 });

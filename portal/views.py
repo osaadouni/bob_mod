@@ -246,7 +246,7 @@ class PvVerdenkingCreateView(LoginRequiredMixin, VerbalisantMixin, PersoonTypeMi
         pv_valid = pv_form.is_valid()
         print(f"pv_valid: {pv_valid}")
         if not pv_valid:
-            print(f"{pv_form.errors}")
+            print(f"pv_form is invalid: {pv_form.errors}")
             return JsonResponse({'error': 'PV form is not valid'})
 
         # save pv without commit
@@ -267,6 +267,7 @@ class PvVerdenkingCreateView(LoginRequiredMixin, VerbalisantMixin, PersoonTypeMi
         self.aanvraag.pv_verdenking = pv
         self.aanvraag.save()
 
+        print("Done")
         sys.exit()
         return redirect(self.get_success_url())
 

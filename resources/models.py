@@ -4,83 +4,102 @@ from django.urls import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django_fsm import FSMField, transition, has_transition_perm, get_all_FIELD_transitions, get_available_FIELD_transitions, get_available_user_FIELD_transitions
 from django.conf import  settings
+from polymorphic.models import PolymorphicModel
 
+from .constants import ENTITY_CHOICES, NP_ENTITY_TYPE, RP_ENTITY_TYPE, ON_ENTITY_TYPE, VERDACHTE_CHOICES,VERDACHTE,\
+    BETROKKENE, FEMALE, MALE,GENDRE_CHOICES, COUNTRIES, BOOL_CHOICES, VERSTREKKING_GEGEVENS_TARGETS, VERLENING_PERIODES
 
-BOOL_CHOICES = ((True, 'Ja'), (False, 'Nee'))
-
-VERLENING_PERIODES = (
-    ('DD', 'Dag/Dagen'),
-    ('WW', 'Week/Weken'),
-    ('MM', 'Maand/Maanden'),
-)
-
-VERSTREKKING_GEGEVENS_TARGETS = (
-    ('verba', 'Verbalisant'),
-    ('ander', 'Andere'),
-)
-
-
-def user_directory_path(instance, filename):
-    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
-    #return 'user_{0}/{1}'.format(instance.user.id, filename)
-    return 'user_{0}/{1}'.format(instance.user.username, filename)
-
-
-##################################
-# Model: Persoon
-##################################
-class Persoon(models.Model):
-    voornaam = models.CharField('Voornaam', max_length=100)
-    achternaam = models.CharField('Achternaam', max_length=100)
-    email = models.EmailField()
-    mobiel = models.CharField('Mobiel', max_length=20)
 
 
 ##################################
 # Model: NatuurlijkPersoon
 ##################################
-class NatuurlijkPersoon(Persoon):
-    pass
+class NatuurlijkPersoonProcesVerbaal(models.Model):
+    voornaam = models.CharField(max_length=30, null=True, blank=True)
+    voorvoegsel = models.CharField(max_length=10, null=True, blank=True)
+    achternaam = models.CharField(max_length=30)
+    geslacht = models.CharField(max_length=5, choices=GENDRE_CHOICES,   null=True, blank=True)
+    geboortedatum = models.DateField(null=True, blank=True)
+    geboorteland = models.CharField(max_length=2, choices=COUNTRIES, null=True, blank=True)
+    nationaliteit = models.CharField(max_length=100, null=True, blank=True)
+    adres = models.CharField(max_length=200, null=True, blank=True)
+    postcode = models.CharField(max_length=10, null=True, blank=True)
+    plaats = models.CharField("Woonplaats", max_length=100, null=True, blank=True)
+    land = models.CharField("Land", max_length=2, choices=COUNTRIES, null=True, blank=True)
+    keno_nummer = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.achternaam
 
 
 ##################################
 # Model: RechtsPersoon
 ##################################
-class RechtsPersoon(Persoon):
-    pass
+class RechtsPersoonProcesVerbaal(models.Model):
+    naam = models.CharField(max_length=40, null=True, blank=True)
+    rechtsvorm = models.CharField(max_length=40, null=True, blank=True)
+    statutaire_adres = models.CharField(max_length=100, null=True, blank=True)
+    vestiging_adres = models.CharField(max_length=100, null=True, blank=True)
+    post_adres = models.CharField(max_length=100, null=True, blank=True)
+    kvk_nummer = models.CharField(max_length=50, null=True, blank=True)
+    vertegenwoordiger = models.CharField(max_length=50)
+    functie = models.CharField(max_length=50, null=True, blank=True)
 
-
+    def __str__(self):
+        return self.naam
 
 
 ##################################
 # Model: Verbalisant
 ##################################
-class Verbalisant(models.Model):
+class VerbalisantProcesVerbaal(models.Model):
     naam = models.CharField('Naam', max_length=100, null=True, blank=True)
-    email = models.EmailField()
-    rang = models.CharField('Rang', max_length=100)
+    email = models.EmailField(null=True, blank=True)
+    rang = models.CharField('Rang', max_length=100, null=True, blank=True)
 
     def __str__(self):
         return f"{self.naam} (#{self.pk})"
 
 
 ##################################
-# Model: PvVerdenking
+# Default Model: ProcesVerbaal
 ##################################
-class PvVerdenking(models.Model):
+class ProcesVerbaal(PolymorphicModel):
     pv_nummer = models.CharField('PV nummer', max_length=50)
-    bvh_nummer = models.CharField('BVH nummer', max_length=50)
+    bvh_nummer = models.CharField('BVH nummer', max_length=50, null=True, blank=True)
     naam_ovj = models.CharField('Naam Officier van Justitie', max_length=100, null=True, blank=True)
     parket_nummer =  models.CharField(max_length=100, null=True, blank=True)
     rc_nummer = models.CharField(max_length=100, null=True, blank=True)
+    toelichting = models.CharField(max_length=255, null=True, blank=True)
+    pdf_document = models.FileField("PDF bijlage", upload_to="documents/%Y/%m/%d")
 
-    verbalisanten = models.ManyToManyField(Verbalisant, blank=True, null=True)
-
-    rechtspersoon = models.ForeignKey(RechtsPersoon, on_delete=models.SET_NULL, null=True, blank=True)
-    natuurlijkpersoon = models.ForeignKey(NatuurlijkPersoon, on_delete=models.SET_NULL, null=True, blank=True)
+    verbalisanten = models.ManyToManyField(VerbalisantProcesVerbaal, blank=True)
+    entity_type = models.CharField('Onderzoek richt zich op', max_length=2, choices=ENTITY_CHOICES,
+                                   blank=True,
+                                   default=NP_ENTITY_TYPE)
+    jegens_persoon = models.ForeignKey(NatuurlijkPersoonProcesVerbaal, on_delete=models.SET_NULL, null=True, blank=True)
+    jegens_rechtspersoon = models.ForeignKey(RechtsPersoonProcesVerbaal, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"PV Verdenking - {self.pv_nummer} (#{self.pk})"
+        return f"PV Verbaal - {self.pv_nummer} (#{self.pk})"
+
+
+##################################
+# Child PVs, subclass ProcesVerbaal
+##################################
+class ProcesVerbaalVerdenking(ProcesVerbaal):
+    pass
+
+class ProcesVerbaalAanvraag(ProcesVerbaal):
+    pass
+
+
+class ProcesVerbaalHistorischeGegevens(ProcesVerbaalAanvraag):
+    jegens_verdachte = models.CharField('Jegens verdachte', max_length=20, choices=VERDACHTE_CHOICES)
+    start_datum = models.DateField()
+    eind_datum = models.DateField()
+    rekeningnummer = models.CharField('IBAN nummer', max_length=30)
+    financiele_instelling = models.CharField('Financiele instelling', max_length=100)
 
 
 ##################################
@@ -119,7 +138,8 @@ class BOBAanvraag(models.Model):
     status = FSMField(default='aangemaakt')
 
     # PV FKs
-    pv_verdenking = models.ForeignKey(PvVerdenking, on_delete=models.SET_NULL, null=True, blank=True)
+    pv_verdenking = models.ForeignKey(ProcesVerbaalVerdenking, on_delete=models.SET_NULL, null=True, blank=True)
+    pv_aanvraag = models.ForeignKey(ProcesVerbaalAanvraag, on_delete=models.SET_NULL, null=True, blank=True)
 
     # owner of instance
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
