@@ -15,11 +15,14 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.template import RequestContext
 
-from resources.models import BOBAanvraag, PvVerdenking, Verbalisant, RechtsPersoon, NatuurlijkPersoon, Persoon
+from resources.models import BOBAanvraag, ProcesVerbaalVerdenking, ProcesVerbaalHistorischeGegevens, ProcesVerbaalAanvraag, \
+    VerbalisantProcesVerbaal, RechtsPersoonProcesVerbaal, NatuurlijkPersoonProcesVerbaal
 from resources.forms import BOBAanvraagForm, BOBAanvraagStatusForm, BOBAanvraagFilterFormHelper, \
-    PvVerdenkingForm, VerbalisantForm, PvMultiForm, RechtsPersoonForm, NatuurlijkPersoonForm
+    ProcesVerbaalVerdenkingForm, VerbalisantForm, PVMultiForm, RechtsPersoonForm, NatuurlijkPersoonForm, \
+    ProcesVerbaalHistorischeGegevensForm
 from resources.tables import BOBAanvraagTable
 from resources.filters import BOBAanvraagFilter
+from resources.constants import NP_ENTITY_TYPE, RP_ENTITY_TYPE, ENTITY_CHOICES
 
 
 # Create your views here.
@@ -106,7 +109,7 @@ class BOBAanvraagDetailDisplayView(LoginRequiredMixin, DetailView, FormView):
     model = BOBAanvraag
     template_name = 'portal/bobaanvraag_detail.html'
 
-    form_class = PvMultiForm
+    form_class = PVMultiForm
 
     def get(self, request, *args, **kwargs):
         print(f"{self.__class__.__name__}::get()")
@@ -135,10 +138,10 @@ class BOBAanvraagDetailDisplayView(LoginRequiredMixin, DetailView, FormView):
         # check if PV verdenking exists
         pvv_url = None
         if self.object.pv_verdenking is not None:
-            form = PvVerdenkingForm(instance=self.object.pv_verdenking)
+            form = ProcesVerbaalVerdenkingForm(instance=self.object.pv_verdenking)
             pvv_url = reverse('portal:portal-pvv-detail', args=[str(self.object.pk), str(self.object.pv_verdenking.pk)])
         else:
-            form = PvVerdenkingForm()
+            form = ProcesVerbaalVerdenkingForm()
             pvv_url = reverse('portal:portal-pvv-create', args=[str(self.object.pk)])
 
         form.helper.form_action = reverse('portal:portal-detail', args=[str(self.object.pk)])
@@ -156,25 +159,76 @@ class BOBAanvraagDetailDisplayView(LoginRequiredMixin, DetailView, FormView):
 
 
 ############################################################
+#  Verbalisanten mixin
+############################################################
+class VerbalisantMixin:
+    def save_verbalisant(self, request, *args, **kwargs ):
+        print(f"{self.__class__.__name__}::save_verbalisant()")
+        verbalisanten = set()
+        for i in range(1, 10):
+            naam = request.POST.get('{}-naam-{}'.format(VerbalisantForm.prefix, i), None)
+            rang = request.POST.get('{}-rang-{}'.format(VerbalisantForm.prefix, i), None)
+            email = request.POST.get('{}-email-{}'.format(VerbalisantForm.prefix, i), None)
+            if naam and rang and email:
+                print(f"==> verb {i}: {naam}, {rang}, {email}")
+                verb = VerbalisantProcesVerbaal(naam=naam, rang=rang, email=email)
+                verb.save()
+                verbalisanten.add(verb)
+        return verbalisanten
+
+############################################################
+#  Persoon Type mixin
+############################################################
+class PersoonTypeMixin:
+    def save_persoon(self, request, *args, **kwargs ):
+        print(f"{self.__class__.__name__}::save_persoon()")
+        pv = kwargs.get('pv', None)
+        form = kwargs.get('form', None)
+        if pv is None or form is None:
+            print(f"pv is none or form is none")
+            return None
+        print(f"entity: {pv.entity_type}")
+        if pv.entity_type == NP_ENTITY_TYPE:
+            persoon_form = form['natuurlijk_persoon']
+            if not persoon_form.is_valid():
+                print(f"persoon_form not valid: {persoon_form.errors}")
+                return JsonResponse({"error" : persoon_form.errors})
+            persoon = persoon_form.save()
+            pv.jegens_persoon = persoon
+
+        elif pv.entity_type == RP_ENTITY_TYPE:
+            persoon_form = form['rechtspersoon']
+            if not persoon_form.is_valid():
+                print(f"persoon_form not valid: {persoon_form.errors}")
+                return JsonResponse({"error" : persoon_form.errors})
+            persoon = persoon_form.save()
+            pv.jegens_rechtspersoon = persoon
+        return pv
+
+
+############################################################
 # PV verdenking Views
 ############################################################
-class PvVerdenkingCreateView(LoginRequiredMixin, CreateView):
+class PvVerdenkingCreateView(LoginRequiredMixin, VerbalisantMixin, PersoonTypeMixin,  CreateView):
+    form_class = PVMultiForm
     template_name = 'portal/pv_verdenking_form.html'
-    form_class = PvVerdenkingForm
-    model = PvVerdenking
+
+    def dispatch(self, request, *args, **kwargs):
+        print(f"{self.__class__.__name__}::dispatch()")
+        self.aanvraag_id = kwargs.get('aanvraag_id', None)
+        self.aanvraag = get_object_or_404(BOBAanvraag, pk=self.aanvraag_id)
+        print(f"==> aanvraag_id: {self.aanvraag_id}; aanvraag: {self.aanvraag}")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-
         print(f"{self.__class__.__name__}::get_context_data()")
         context = super().get_context_data(**kwargs)
-        aanvraag_id = self.kwargs.get('aanvraag_id', None)
-        aanvraag = get_object_or_404(BOBAanvraag, pk=aanvraag_id)
-        print(f"aanvraag: {aanvraag}")
+        context['aanvraag_id'] = self.aanvraag_id
+        context['aanvraag'] = self.aanvraag
 
         # set object
-        form = PvVerdenkingForm()
-
-        form.helper.form_action = reverse('portal:portal-pvv-create', args=[str(aanvraag_id)])
+        form = self.form_class()
+        form.helper.form_action = reverse('portal:portal-pvv-create', args=[str(self.aanvraag_id)])
         context['form'] = form
         return context
 
@@ -187,90 +241,34 @@ class PvVerdenkingCreateView(LoginRequiredMixin, CreateView):
         :return:
         """
         print(f"{self.__class__.__name__}::post()")
-        print(f"POST: {self.request.POST}")
-        self.aanvraag_id = kwargs.get('aanvraag_id', None)
-        print(f"aanvraag_id: {self.aanvraag_id}")
-
-        #next_status = self.request.POST.get('next_status', None)
-        self.aanvraag = get_object_or_404(BOBAanvraag, pk=self.aanvraag_id)
-
-        verb_form = VerbalisantForm(self.request.POST)
-        print(verb_form)
-        rp_form = RechtsPersoonForm(self.request.POST)
-        print(rp_form)
-        np_form = NatuurlijkPersoonForm(self.request.POST)
-        print(np_form)
-
-        pv_form = PvVerdenkingForm(self.request.POST)
-        print(f"\n----------\npv_form:\n{pv_form}\n---------\n")
-
-        verb_valid = verb_form.is_valid()
-        rp_valid = rp_form.is_valid()
-        np_valid = np_form.is_valid()
+        form = self.form_class(self.request.POST, self.request.FILES)
+        pv_form = form['verdenking']
         pv_valid = pv_form.is_valid()
+        print(f"pv_valid: {pv_valid}")
+        if not pv_valid:
+            print(f"{pv_form.errors}")
+            return JsonResponse({'error': 'PV form is not valid'})
 
-        if verb_valid:
-            print("verb_form is valid")
-        else:
-            print("verb_form is invalid")
-            #print(verb_form.errors)
+        # save pv without commit
+        pv = pv_form.save(commit=False)
 
-        if rp_valid:
-            print("rp_form is valid")
-        else:
-            print("rp_form is invalid")
+        # save persoon type
+        pv = self.save_persoon(request, pv=pv, form=form)
+        pv.save()
 
-        if np_valid:
-            print("np_form is valid")
-        else:
-            print("np_form is invalid")
-
-        if pv_valid:
-            print("pv_form is valid")
-        else:
-            print("pv_form is invalid")
-            print(pv_form.errors)
-
-        pv_verdenking = None
-        if pv_valid:
-            pv_verdenking = pv_form.save(commit=False)
-
-        if np_valid:
-            np = np_form.save()
-            pv_verdenking.natuurlijkpersoon = np
-
-        if rp_valid:
-            rp = rp_form.save()
-            pv_verdenking.rechtspersoon = rp
-
-        # save the pv model instance (
-        pv_verdenking.save()
-
-        for i in range(1, 10):
-
-            naam = self.request.POST.get('{}-naam-{}'.format(VerbalisantForm.prefix, i), None)
-            rang = self.request.POST.get('{}-rang-{}'.format(VerbalisantForm.prefix, i), None)
-            email = self.request.POST.get('{}-email-{}'.format(VerbalisantForm.prefix, i), None)
-
-            if naam and rang and email:
-                print(f"verb {i}: {naam}, {rang}, {email}")
-                verb = Verbalisant(naam=naam, rang=rang, email=email)
-                verb.save()
-                pv_verdenking.verbalisanten.add(verb)
-
-
-        # save m2m
-        #pv_verdenking.save_m2m()
+        # save verbalisanten
+        verbalisanten = self.save_verbalisant(request)
+        pv.verbalisanten.set(verbalisanten)
 
         # add object
-        self.object = pv_verdenking
+        self.object = pv
 
         # assign pv verdenking to aanvraag
-        self.aanvraag.pv_verdenking = pv_verdenking
+        self.aanvraag.pv_verdenking = pv
         self.aanvraag.save()
-        messages.add_message(request, messages.SUCCESS, 'PV verdenking is successvol ingevuld.')
-        return redirect(self.get_success_url())
 
+        sys.exit()
+        return redirect(self.get_success_url())
 
     def render_to_response(self, context, **response_kwargs):
         print(f"{self.__class__.__name__}::render_to_response()")
@@ -284,8 +282,8 @@ class PvVerdenkingCreateView(LoginRequiredMixin, CreateView):
 # PV Verdenking detail view
 class PvVerdenkingDetailView(LoginRequiredMixin, DetailView):
     template_name = 'portal/pv_verdenking_detail.html'
-    form_class = PvVerdenkingForm
-    model = PvVerdenking
+    form_class = ProcesVerbaalVerdenkingForm
+    model = ProcesVerbaalVerdenking
 
 
     def get_context_data(self, **kwargs):
