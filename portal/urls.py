@@ -22,6 +22,13 @@ urlpatterns = [
     # PV verdenking
     path('detail/<int:aanvraag_id>/pvv/add', views.PvVerdenkingCreateView.as_view(), name='portal-pvv-create'),
     path('detail/<int:aanvraag_id>/pvv/detail/<int:pk>', views.PvVerdenkingDetailView.as_view(), name='portal-pvv-detail'),
+
+    # PV aanvraag
+    path('detail/<int:aanvraag_id>/pva/select', views.PVAanvraagSelectView.as_view(), name='portal-pva-select'),
+    path('detail/<int:aanvraag_id>/pva/add/<str:middel>', views.PVAanvraagCreateView.as_view(), name='portal-pva-create'),
+    path('detail/<int:aanvraag_id>/pva/detail/<int:pk>', views.PVAanvraagDetailView.as_view(),
+         name='portal-pva-detail'),
+
     # verbalisant
     path('verbalisant/add', views.VerbalisantCreateView.as_view(), name='verbalisant-create'),
 

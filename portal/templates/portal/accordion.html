@@ -1,0 +1,41 @@
+
+<div id="accordion" role="tablist" class="mt-3">
+
+  {#  ----------------- #}
+  {#  PV van Verdenking #}
+  {#  ----------------- #}
+  <div class="card pv-tab-wrapper" data-pv-type="verdenking">
+    <div class="card-header btn-pv-tab" role="tab" id="headingOne" data-url="{{ pvv_url }}">
+      <h5 class="mb-0">
+        <a class="lnk-pv-tab" data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" data-url="{{ pvv_url }}">
+          <i class="fa fa-folder"></i> PV van Verdenking
+        </a>
+      </h5>
+    </div>
+
+    <div id="collapseOne" class="collapse" role="tabpanel" aria-labelledby="headingOne" data-parent="#accordion">
+      <div class="card-body pv-tab-content-wrapper">
+          Loading...
+      </div>
+    </div>
+  </div>
+
+  {#  ----------------- #}
+  {#  PV van Aanvraag   #}
+  {#  ----------------- #}
+  <div class="card pv-tab-wrapper" data-pv-type="aanvraag">
+    <div class="card-header btn-pv-tab" role="tab" id="headingTwo" data-url="{{ pva_url }}">
+      <h5 class="mb-0">
+        <a class="lnk-pv-tab collapsed" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" data-url="{{ pva_url }}">
+            <i class="fa fa-folder"></i> PV van Aanvraag
+        </a>
+      </h5>
+    </div>
+    <div id="collapseTwo" class="collapse" role="tabpanel" aria-labelledby="headingTwo" data-parent="#accordion">
+      <div class="card-body pv-tab-content-wrapper">
+        Loading...
+      </div>
+    </div>
+  </div>
+
+</div>

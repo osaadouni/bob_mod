@@ -598,7 +598,7 @@ class ProcesVerbaalHistorischeGegevensForm(PVCommonForm):
                 PersoonLayout(),
                 VerbalisantLayout(),
                 Row(
-                    CustomCrispyField('pdf_document', template='resources_frontend/includes/file_input.html',
+                    CustomCrispyField('pdf_document', template='resources/includes/file_input.html',
                         extra_context={'prefix': self.prefix}
                     ),
                     css_class=""
@@ -615,7 +615,7 @@ class ProcesVerbaalHistorischeGegevensForm(PVCommonForm):
 ######################################
 class PVMultiForm(MultiModelForm):
     form_classes = {
-        'verdenking': ProcesVerbaalVerdenkingForm,
+        'pv_form': ProcesVerbaalVerdenkingForm,
         'natuurlijk_persoon': NatuurlijkPersoonForm,
         'rechtspersoon': RechtsPersoonForm,
         'verbalisant': VerbalisantForm,
@@ -650,3 +650,35 @@ class PVMultiForm(MultiModelForm):
     #        print(f"{self.__class__.__name__}::save() - profile saved.")
     #    return objects
 
+
+###############################################
+# PV Aanvraag Select Form
+###############################################
+class PVAanvraagSelectForm(forms.Form):
+    form_type = forms.ChoiceField(label="Kies een BOB middel: ", widget=forms.Select(), choices=[], required=True)
+    class Meta:
+        fields = ('next_status',)
+
+    def __init__(self, *args, **kwargs):
+        available_forms = kwargs.pop('available_forms')
+        print(f"available_forms: {available_forms}")
+        super().__init__(*args, **kwargs)
+        self.fields['form_type'].choices = available_forms
+        self.helper = FormHelper()
+        self.helper.form_class = 'inline-form'
+        self.helper.form_action = "."
+        self.helper.form_method = "GET"
+        self.helper.form_id = 'pvAanvraagFormSelectId'
+        self.helper.attrs = {'novalidate': 'true'}
+        self.helper.layout = Layout(
+            Row(
+                Field('form_type', css_class='pv-aanvraag-form-select', wrapper_class="col-sm-6"),
+               css_class='row'
+            ),
+        )
+
+
+
+pv_aanvraag_forms = {
+    'ProcesVerbaalHistorischeGegevens': ProcesVerbaalHistorischeGegevensForm
+}

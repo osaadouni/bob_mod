@@ -53,7 +53,83 @@ $(function($) {
         });
     }
 
+    function showTabContent($tab) {
+        console.log('-----------------------');
+        console.log('showTabContent()')
+        console.log('-----------------------');
+        var $accordion = $tab.closest('div#accordion');
+        var $tab_wrapper = $tab.closest('div.pv-tab-wrapper');
 
+        var $container = $tab_wrapper.find('div.pv-tab-content-wrapper');
+        console.log('$container.length: ' + $container.length);
+        if (!$container.length) {
+            console.log('container missing');
+            return false;
+        }
+        $container.empty();
+
+        // check if current already open
+        var is_open = $accordion.find('div.collapse').hasClass('show');
+        if (is_open) {
+            console.log('already open.');
+            $accordion.find('div.collapse').removeClass('show');
+            $tab.removeClass('collapsed');
+            return false;
+        }
+        // reset
+        $accordion.find('div.collapse').removeClass('show');
+        $accordion.find('a.lnk-pv-tab').removeClass('collapsed');
+
+        // update current
+        $tab.addClass('collapsed');
+        $tab_wrapper.find('div.collapse').addClass('show');
+
+        // get url
+        var url = $tab.attr('data-url');
+        console.log('data-url: ' + url);
+
+        $.ajax(url, {
+            dataType: 'json',
+            data: {},
+            success: function (data, status, xhr) {
+                console.log(data);
+                if (typeof undefined !== typeof data.html && false !== data.html) {
+                    $(data.html).appendTo($container);
+
+                    // set entity type
+                    $entity_checked = $container.find('input[type=radio].entity-type-check:checked');
+                    if (!$entity_checked.length) {
+                        $entity_checked = $container.find('input[type=radio].entity-type-check').first();
+                        $entity_checked.prop('checked', true);
+                    }
+                    $entity_checked.trigger('click');
+
+                    // scroll up to the first input element
+                    $first = $container.find('input[type=text],textarea,select').filter(':visible:first');
+                    console.log('$first.length: ' + $first.length);
+                    if ($first.length) {
+                        $('html, body').animate({
+                            scrollTop: $first.offset().top - 100
+                        }, 2000);
+                    }
+                }
+            },
+            error: function (jqXhr, textStatus, errorMessage) {
+                console.log(errorMessage);
+            }
+        });
+    }
+
+    function jsonResponseFound(data) {
+        if (typeof undefined !== typeof data && false !== data) {
+            return true;
+        }
+        return false;
+    }
+
+    /*
+     * On Document ready()
+     */
     $(document).ready(function(){
         console.log('ready');
         $fields = $('input,textarea,select').filter('[required]:visible');
@@ -200,64 +276,21 @@ $(function($) {
 
         });
 
+
+        /*
+         * accordion tabs event handling
+         */
         $('body').on('click', 'div#accordion  div.btn-pv-tab a.lnk-pv-tab', function(e) {
             e.preventDefault();
             e.stopPropagation();
             console.log('clicked');
-            // get current container
-            var $container = $(this).closest('div.card').find('div.card-body');
-            console.log('$container.length: ' + $container.length);
-            if (!$container.length) {
-                console.log('container missing');
-                return false;
-            }
-            $container.empty();
-
-            // check if current already open
-            var is_open = $(this).closest('div#accordion').find('div.collapse').hasClass('show');
-            if (is_open) {
-                console.log('already open.');
-                $(this).closest('div#accordion').find('div.collapse').removeClass('show');
-                $(this).removeClass('collapsed');
-                return false;
-
-            }
-
-            // reset
-            $(this).closest('div#accordion').find('div.collapse').removeClass('show');
-            $(this).closest('div#accordion').find('a.lnk-pv-tab').removeClass('collapsed');
-
-            // update current
-            $(this).addClass('collapsed');
-            $(this).closest('div.card').find('div.collapse').addClass('show');
-
-            // get url
-            var url = $(this).attr('data-url');
-            console.log('url: '+ url);
-
-            $.ajax(url, {
-                dataType: 'json',
-                data: {},
-                success: function(data, status, xhr) {
-                    console.log(data);
-                    if (typeof undefined !== typeof data.html && false !== data.html) {
-                        $(data.html).appendTo($container);
-
-                        $first = $container.find('input[type=text],textarea,select').filter(':visible:first');
-                        console.log('$first.length: ' + $first.length);
-                        if ($first.length) {
-                            $('html, body').animate({
-                                scrollTop: $first.offset().top-100
-                            }, 2000);
-                        }
-
-                    }
-                },
-                error: function(jqXhr, textStatus, errorMessage) {
-                    console.log(errorMessage);
-                }
-            });
+            showTabContent($(this));
         });
+        $pv_tab = $('body').find('div#accordion  div.btn-pv-tab a.lnk-pv-tab').first();
+        if ($pv_tab.length) {
+            $pv_tab.trigger('click');
+            //showTabContent($pv_tab);
+        }
 
         // PV van verdenking submit
         $('body').on('submit', 'form#pvVerdenkingFormId', function(e) {
@@ -434,6 +467,49 @@ $(function($) {
                 }
             }
         });
+
+
+        // pv aanvraag form select change event
+        $('body').on('change', 'select.pv-aanvraag-form-select', function(e) {
+            e.stopPropagation();
+            var value = $(this).val();
+            if ( '' === value) {
+                return false;
+            }
+            console.log('pv aanvraag select: ' + value);
+
+            $form_wrapper = $('body').find('div.pv-aanvraag-form-wrapper');
+            console.log('$form_wrapper.length: ' + $form_wrapper.length);
+            if ( !$form_wrapper.length ) {
+                console.log(' missing form_wrapper');
+                return false;
+            }
+            var $form = $(this).closest('form');
+
+            console.log('$form.method: '+ $form.attr('method'));
+            console.log('$form.action: '+ $form.attr('action'));
+            var url = $form.attr('action');
+            url = url.replace('-1', value);
+            console.log('url: ' + url);
+            $.ajax({
+                type: $form.attr('method'),
+                url: url,
+                data: {},
+                dataType: 'json',
+                success: function(data) {
+                    console.log(data);
+                    if (jsonResponseFound(data.html)) {
+                        console.log('json response found!');
+                        $form_wrapper.html(data.html);
+                    } else {
+                        console.log('json response not found!');
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            })
+        }) ;
 
 
 

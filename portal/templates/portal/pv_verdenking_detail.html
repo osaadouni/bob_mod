@@ -4,7 +4,7 @@
         <strong>{{ field.label }}</strong>
     </div>
     <div class="col">
-        {{ field.value }}
+        {{ field.value|default_if_none:"" }}
     </div>
 </div>
 {% endfor %}

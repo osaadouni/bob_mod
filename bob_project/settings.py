@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'django_fsm_log',
     'selenium',
     'betterforms',
+    'django_extensions',
 
 
     # local
