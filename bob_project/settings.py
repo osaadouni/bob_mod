@@ -28,6 +28,18 @@ environ.Env.read_env()
 # False if not in os.environ
 DEBUG = env('DEBUG')
 
+
+##### Channels settings
+ASGI_APPLICATION = "bob_project.routing.application"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -39,7 +51,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -63,7 +75,8 @@ INSTALLED_APPS = [
     'selenium',
     'betterforms',
     'django_extensions',
-
+    'debug_toolbar',
+    'channels', # websocket app
 
     # local
     'accounts',
@@ -71,6 +84,9 @@ INSTALLED_APPS = [
     'portal',
     'interception',
     'resources',
+
+    'chat', # uses channels ws
+
 ]
 
 MIDDLEWARE = [
@@ -81,6 +97,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'bob_project.urls'

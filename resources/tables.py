@@ -7,8 +7,7 @@ class BOBAanvraagTable(tables.Table):
         model = BOBAanvraag
         #template_name = 'django_tables2/bootstrap-responsive.html'
         template_name = 'django_tables2/bootstrap4.html'
-        fields = ('id', 'status', 'dvom_aanvraagpv', 'dvom_datumpv', 'dvom_verbalisant', 'dvom_verbalisantcontactgegevens',
-                  'pdf_document', 'owner', 'edit', 'view','delete')
+        fields = ('id', 'status',  'verbalisant', 'verbalisant_email', 'owner', 'edit', 'view','delete')
 
 
         attrs = {

@@ -31,5 +31,6 @@ urlpatterns = [
 
     # verbalisant
     path('verbalisant/add', views.VerbalisantCreateView.as_view(), name='verbalisant-create'),
+    path('autocomplete/', views.AutoCompleteView.as_view(), name='autocomplete-view'),
 
 ]

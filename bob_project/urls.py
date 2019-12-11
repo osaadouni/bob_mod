@@ -28,6 +28,7 @@ urlpatterns = [
     path('portal/', include('portal.urls')),
     path('interception/', include('interception.urls')),
 
+    path('chat/', include('chat.urls')), # Websocket stuff
     path('admin/', admin.site.urls),
 ]
 

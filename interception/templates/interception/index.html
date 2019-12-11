@@ -13,4 +13,96 @@
        <h1 class="mt-4">Welkom Interceptiedesk medewerker!</h1>
   </div>
 
+  <div class="container">
+    <textarea id="chat-log" cols="100" rows="20"></textarea><br/>
+    <input id="chat-message-input" type="text" size="100"/><br/>
+    <input id="chat-message-submit" type="button" value="Send"/>
+  </div>
+
+
+    <script>
+    $(function($) {
+
+        var roomName = "{{ room_name_json }}";
+
+        function connect() {
+            var url ='ws://' + window.location.host + '/ws/chat/' + roomName + '/';
+            console.log(url);
+            var ws = new WebSocket( 'ws://' + window.location.host + '/ws/chat/' + roomName + '/');
+            ws.onopen = function () {
+                // subscribe to some channels
+                ws.send(JSON.stringify({
+                        'message': 'Hi server!'
+                }));
+            };
+
+            ws.onmessage = function (e) {
+                console.log('Message:', e.data);
+            };
+
+            ws.onclose = function (e) {
+                console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+                //setTimeout(function () {
+                //    connect();
+                //}, 5000);
+            };
+
+            ws.onerror = function (err) {
+                console.error('Socket encountered error: ', err.message, 'Closing socket');
+                ws.close();
+            };
+            $('body').on('click' , '#chat-message-submit', function(e) {
+                var messageInputDom = $('#chat-message-input');
+                var message = messageInputDom.val();
+                console.log('message: ' + message);
+                console.log(ws);
+                ws.send(JSON.stringify({
+                    'message': message
+                }));
+
+                messageInputDom.val('');
+            });
+        }
+
+        connect();
+    });
+
+    /*
+    var chatSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/chat/' + roomName + '/');
+
+    chatSocket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+        document.querySelector('#chat-log').value += (message + '\n');
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#chat-message-input').focus();
+    document.querySelector('#chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#chat-message-submit').click();
+        }
+    };
+
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        var messageInputDom = document.querySelector('#chat-message-input');
+        var message = messageInputDom.value;
+        console.log('message: ' + message);
+        console.log(chatSocket);
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+
+        messageInputDom.value = '';
+    };
+    */
+    </script>
+
+
+
 {% endblock %}

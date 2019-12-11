@@ -511,7 +511,11 @@ $(function($) {
             })
         }) ;
 
-
+        $('body').find('input#id_verbalisant').autoComplete({
+            resolverSettings: {
+                url: '/portal/autocomplete'
+            }
+        });
 
     }); // end document.ready()
 });

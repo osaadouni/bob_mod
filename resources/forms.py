@@ -134,18 +134,14 @@ class BOBAanvraagForm(forms.ModelForm):
 class BOBAanvraagFilterFormHelper(FormHelper):
     form_method = 'GET'
     form_class = 'form-inline'
+    form_show_labels = False
     field_template = 'bootstrap3/layout/inline_field.html'
     layout = Layout(
-       'verbalisant',
-        'verbalisant_email',
-        'pv_nummer',
-        Submit('submit', 'Zoeken', css_class='btn-politie btn-sm'),
-
+       Field('verbalisant', autocomplete="off", css_class='basicAutoComplete form-control-sm', placeholder="Naam verb..."),
+       Field('verbalisant_email', autocomplete="off", css_class="basicAutoComplete form-control-sm", placeholder="Email verb..."),
+       Field('pv_verdenking__bvh_nummer', autocomplete="off", css_class="basicAutoComplete form-control-sm", placeholder="BVH nummer..."),
+       Submit('submit', 'Zoeken', css_class='btn-politie btn-sm'),
     )
-
-    #layout = Layout(
-    #    FieldWithButtons('dvom_verbalisant', StrictButton('Go!')),
-    #)
 
 
 ###############################################

@@ -1,4 +1,5 @@
 import sys
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import TemplateView, DetailView, View, FormView, ListView
@@ -59,6 +60,7 @@ class BOBAanvraagListView(BaseClassView, SingleTableView, FilterView):
     formhelper_class = BOBAanvraagFilterFormHelper
 
     def get_queryset(self, **kwargs):
+        print(f"{self.__class__.__name__}::get_queryset()")
         qs = super().get_queryset()
         self.filter = self.filterset_class(self.request.GET, queryset=qs)
         self.filter.form.helper = self.formhelper_class()
@@ -291,9 +293,13 @@ class PvVerdenkingCreateView(BaseClassView, PVCommonMixin, VerbalisantMixin, Per
     View Class for creating an new instance of a PV van verdenking.
     """
     form_class = PVMultiForm
+    template_name = None
 
     def get_template_names(self):
-        return ['{}/pv_verdenking_form.html'.format(self.app_name)]
+        print(f"{self.__class__.__name__}::get_template_names()")
+        print(f"self.app_name: {self.app_name}")
+        self.template_name =  '{}/pv_verdenking_form.html'.format(self.app_name)
+        return [self.template_name]
 
     def get_context_data(self, **kwargs):
         print(f"{self.__class__.__name__}::get_context_data()")
@@ -307,46 +313,92 @@ class PvVerdenkingCreateView(BaseClassView, PVCommonMixin, VerbalisantMixin, Per
         context['form'] = form
         return context
 
-    def post(self, request, *args, **kwargs):
+    def form_valid(self, form):
         """
-        Update de aanvraag status
-        :param request: HttpRequest object  containing POST parameters (eg.: next_status)
-        :param args: positional arguments
-        :param kwargs: keyword arguments (eg: pk)
+        Create a new aanvraag pv verdenking.
+        Save the pv first.
+        :param form:
         :return:
         """
-        print(f"{self.__class__.__name__}::post()")
-        form = self.form_class(self.request.POST, self.request.FILES)
-        pv_form = form['verdenking']
-        pv_valid = pv_form.is_valid()
-        print(f"pv_valid: {pv_valid}")
-        if not pv_valid:
-            print(f"pv_form is invalid: {pv_form.errors}")
-            return JsonResponse({'error': 'PV form is not valid'})
+        print(f"{self.__class__.__name__}::form_valid()")
+        print(str(form))
 
         # save pv without commit
-        pv = pv_form.save(commit=False)
+        pv_obj = form['pv_form'].save(commit=False)
 
         # save persoon type
-        pv = self.save_persoon(request, pv=pv, form=form)
-        pv.save()
+        pv_obj = self.save_persoon(request, pv=pv_obj, form=form)
+        pv_obj.save()
 
-        # save verbalisanten
+        # save verbalisant(en)
         verbalisanten = self.save_verbalisant(request)
-        pv.verbalisanten.set(verbalisanten)
+        pv_obj.verbalisanten.set(verbalisanten)
 
-        # add object
-        self.object = pv
+        # assign to object
+        self.object = pv_obj
 
         # assign pv verdenking to aanvraag
-        self.aanvraag.pv_verdenking = pv
+        self.aanvraag.pv_verdenking = pv_obj
         self.aanvraag.save()
 
         print("Done")
         return redirect(self.get_success_url())
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        print(f"{self.__class__.__name__}::form_invalid()")
+        print(f"form.errors: {form.errors}")
+        return super().form_invalid(form)
+
+    #def post(self, request, *args, **kwargs):
+    #    """
+    #    Update de aanvraag status
+    #    :param request: HttpRequest object  containing POST parameters (eg.: next_status)
+    #    :param args: positional arguments
+    #    :param kwargs: keyword arguments (eg: pk)
+    #    :return:
+    #    """
+    #    print(f"{self.__class__.__name__}::post()")
+    #    form = self.form_class(self.request.POST, self.request.FILES)
+    #    pv_form = form['pv_form']
+    #    pv_valid = pv_form.is_valid()
+    #    print(f"pv_valid: {pv_valid}")
+    ##    if not pv_valid:
+    #        print(f"pv_form is invalid: {pv_form.errors}")
+    #        return JsonResponse({'error': 'PV form is not valid'})
+#
+#        sys.exit()
+#
+#        # save pv without commit
+#        pv = pv_form.save(commit=False)
+#
+#        # save persoon type
+#        pv = self.save_persoon(request, pv=pv, form=form)
+#        pv.save()
+#
+#        # save verbalisanten
+#        verbalisanten = self.save_verbalisant(request)
+#        pv.verbalisanten.set(verbalisanten)
+#
+#        # add object
+#        self.object = pv
+#
+#        # assign pv verdenking to aanvraag
+#        self.aanvraag.pv_verdenking = pv
+#        self.aanvraag.save()
+#
+#        print("Done")
+#        return redirect(self.get_success_url())
+
+    def get(self, request, *args, **kwargs):
+        print(f"{self.__class__.__name__}::get()")
+        self.template_name =  '{}/pv_verdenking_form.html'.format(self.app_name)
+        return super().get(request, *args, **kwargs)
 
     def render_to_response(self, context, **response_kwargs):
         print(f"{self.__class__.__name__}::render_to_response()")
+        print(f"self.template_name: {self.template_name}")
+        sys.exit()
         rendered = render_to_string(self.template_name, context, self.request)
         return JsonResponse({'html': rendered})
 
@@ -701,6 +753,20 @@ class VerbalisantCreateView(JSONResponseMixin, CreateView):
         context['index'] = row_index
         context['prefix'] = form.prefix
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        print(f"{self.__class__.__name__}::render_to_response()")
+        rendered = render_to_string(self.template_name, context, self.request)
+        return JsonResponse({'html': rendered})
+
+
+class AutoCompleteView(View):
+
+    def get(self, request):
+        print(f"{self.__class__.__name__}::get()")
+        d = json.dumps(['test', 'testing'])
+        print(f"d: {d}")
+        JsonResponse(d, safe=False)
 
     def render_to_response(self, context, **response_kwargs):
         print(f"{self.__class__.__name__}::render_to_response()")
